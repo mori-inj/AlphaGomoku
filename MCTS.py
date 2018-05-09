@@ -250,10 +250,10 @@ class MCTS:
 
 
 DRAWABLE_MODE = False
-BS = 3
+BS = BOARD_SIZE
 
 if DRAWABLE_MODE == True:
-    mcts = MCTS(3)
+    mcts = MCTS(BS)
     next_node = mcts.root
 
     def _mouse_left_up(event):
@@ -262,7 +262,7 @@ if DRAWABLE_MODE == True:
         x, y = event.x, event.y
 
         print(next_node)
-        for i in range(16):
+        for i in range(10): #16
             mcts.search(next_node)
 
         orig_board = next_node.state.board
@@ -276,9 +276,16 @@ if DRAWABLE_MODE == True:
         c = idx % BS
         mcts.draw()
         
-        if is_game_ended(next_board, next_node.state.turn(), 3, BS, r, c):
-            mcts = MCTS(3)
+        if is_game_ended(next_board, next_node.state.turn(), N_IN_A_ROW, BS, r, c):
+            mcts = MCTS(BS)
             next_node = mcts.root
+            print('===============================')
+        
+        if next_node.state.turn() == BS*BS:
+            mcts = MCTS(BS)
+            next_node = mcts.root
+            print('===============================')
+
 
 
     def _draw_circle(self, x, y, r, **kwargs):
@@ -303,7 +310,7 @@ if DRAWABLE_MODE == True:
     mcts_tk.mainloop()
 
 else:
-    for iteration in range(25):#000):
+    for iteration in range(25000):
         mcts = MCTS(BS)
         node = mcts.root
         print("iter: ", iteration)
@@ -312,7 +319,7 @@ else:
         pi_list = []
         z_list = []
         while True:
-            for i in range(4):#1600):
+            for i in range(1600):
                 mcts.search(node)
             orig_state = node.state
             orig_board = orig_state.board
@@ -338,14 +345,18 @@ else:
             idx = np.argmax(nb - ob)
             r = idx // BS
             c = idx % BS
-            if is_game_ended(next_board, next_state.turn(), 3, BS, r, c):
+            if is_game_ended(next_board, next_state.turn(), N_IN_A_ROW, BS, r, c):
                 z_list.append([next_state.turn()%2*2-1])
                 break
+            if next_state.turn() == BS*BS:
+                z_list.append([0])
+                break
+
         
         input_list = np.asarray(input_list)
         pi_list = np.asarray(pi_list)
         z_list = np.asarray(z_list)
-
+        """
         print('==========input========')
         print(input_list.tolist())
         print('============pi=========')
@@ -353,4 +364,5 @@ else:
         print('============z==========')
         print(z_list.tolist())
         print('=======================')
-        network.train(input_list, pi_list, z_list) 
+        """
+        network.train(input_list, pi_list, z_list, 20) 

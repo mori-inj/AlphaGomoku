@@ -81,8 +81,8 @@ class Network:
         self.sess = tf.Session(graph = self.g)
         self.sess.run(self.init)
 
-    def train(self, X_, pi_, Z_):
-        for i in range(100): # TODO should change # of iteration steps
+    def train(self, X_, pi_, Z_, it):
+        for i in range(it): # TODO should change # of iteration steps
             self.sess.run(self.train_model, feed_dict={self.X: X_, self.pi: pi_, self.Z: Z_})
             if i % 10 == 0:
                 print('======= ' + str(i) + ' =======')
