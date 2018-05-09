@@ -44,7 +44,7 @@ def ValueOutputBlock(x, board_size):
 
 
 
-class PolicyValueNetwork:
+class Network:
     def __init__(self, board_size, input_frame_num, residual_num):
         self.board_size = board_size
         self.input_frame_num = input_frame_num
