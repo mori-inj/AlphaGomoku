@@ -47,6 +47,49 @@ def draw_board(canvas, sx, sy, board, node=None, parent=None, selected=None):
         txt += "P:%.2f\n" % parent.P[node]
         ci = canvas.create_text(sx, sy+bs, anchor="nw", fill="#FFF", text=txt)
 
+
+
+def is_game_ended(board, turn, N_IN_A_ROW, BOARD_SIZE, row=-1, col=-1):
+    if row < 0 and col < 0:
+        if turn==0:
+            return False
+        for i in range(BOARD_SIZE):
+            for j in range(BOARD_SIZE):
+                if board[i][j] == turn:
+                    row = i
+                    col = j
+                    break
+            else:
+                continue
+            break
+    dx = [1, 1, 0, -1, -1, -1, 0, 1]
+    dy = [0, -1, -1, -1, 0, 1, 1, 1]
+    nx = col
+    ny = row
+    player = board[row][col]%2*2-1
+
+    for key in range(8):
+        for i in range(N_IN_A_ROW):
+            nx = col - i*dx[key]
+            ny = row - i*dy[key]
+            for j in range(N_IN_A_ROW):
+                if not (0 <= nx and nx < BOARD_SIZE and 0 <= ny and ny < BOARD_SIZE):
+                    break
+                if board[ny][nx]>0 and board[ny][nx]%2*2-1 != player:
+                    break
+                if board[ny][nx] == 0:
+                    break
+                nx = nx + dx[key]
+                ny = ny + dy[key]
+            else:
+                return True
+    return False
+
+
+
+
+
+
 class BoardState:
     def __init__(self, board_size):
         self.board_size = board_size
@@ -73,40 +116,7 @@ class Gomoku:
 
    
     def is_game_ended(self, row=-1, col=-1):
-        if row < 0 and col < 0:
-            if self.turn==0:
-                return False
-            for i in range(self.BOARD_SIZE):
-                for j in range(self.BOARD_SIZE):
-                    if self.board[i][j] == self.turn:
-                        row = i
-                        col = j
-                        break
-                else:
-                    continue
-                break
-        dx = [1, 1, 0, -1, -1, -1, 0, 1]
-        dy = [0, -1, -1, -1, 0, 1, 1, 1]
-        nx = col
-        ny = row
-        player = self.board[row][col]%2*2-1
-
-        for key in range(8):
-            for i in range(self.N_IN_A_ROW):
-                nx = col - i*dx[key]
-                ny = row - i*dy[key]
-                for j in range(self.N_IN_A_ROW):
-                    if not (0 <= nx and nx < self.BOARD_SIZE and 0 <= ny and ny < self.BOARD_SIZE):
-                        break
-                    if self.board[ny][nx]>0 and self.board[ny][nx]%2*2-1 != player:
-                        break
-                    if self.board[ny][nx] == 0:
-                        break
-                    nx = nx + dx[key]
-                    ny = ny + dy[key]
-                else:
-                    return True
-        return False
+        return is_game_ended(self.board, self.turn, self.N_IN_A_ROW, self.BOARD_SIZE, row, col)
 
     def is_valid_input(self, row, col):
         if not(0<=row<self.BOARD_SIZE and 0<=col<self.BOARD_SIZE):

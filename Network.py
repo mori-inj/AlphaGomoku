@@ -70,6 +70,8 @@ class Network:
             self.value_loss = (self.Z - self.V)**2
             self.policy_loss = - self.pi * tf.log(tf.maximum(self.P,1e-7))
             self.loss = tf.reduce_mean(self.value_loss + self.policy_loss + theta)
+            self.vl = tf.reduce_mean(self.value_loss)
+            self.pl = tf.reduce_mean(self.policy_loss)
             
             learning_rate = 0.02 # TODO apply learning step anneling
             optimizer = tf.train.MomentumOptimizer(learning_rate, 0.9)
@@ -82,7 +84,12 @@ class Network:
     def train(self, X_, pi_, Z_):
         for i in range(100): # TODO should change # of iteration steps
             self.sess.run(self.train_model, feed_dict={self.X: X_, self.pi: pi_, self.Z: Z_})
-            print(self.sess.run(self.loss, feed_dict={self.X: X_, self.pi: pi_, self.Z: Z_}))
+            if i % 10 == 0:
+                print('======= ' + str(i) + ' =======')
+                l, pl, vl = self.sess.run([self.loss, self.pl, self.vl], feed_dict={self.X: X_, self.pi: pi_, self.Z: Z_})
+                print('loss: ' , l)
+                print('policy loss: ', pl)
+                print('value loss: ', vl)
 
     def get_output(self, X_):
         return self.sess.run([self.P, self.V], feed_dict={self.X: X_})

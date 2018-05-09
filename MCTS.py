@@ -185,16 +185,33 @@ class Node:
         self.Q[child] = self.W[child] / self.N[child]
         if self.parent != None:
             self.parent.backup(v, self)
-   
-    def play(self, t):
-        N_list = []
+    
+    def get_pi(self, t):
+        pi = {}
+        N_sum = 0
         for n in self.N:
-            N_list.append((self.N[n] ** (1/t), n))
-        N_sum = N_list[-1][0]
-        r = np.random.uniform(0, N_sum)
+            pi[n] = self.N[n] ** (1/t)
+            N_sum += pi[n]
+        
+        for n in pi:
+            pi[n] /= N_sum
+
+        return pi, N_sum
+
+    def play(self, t):
+        pi, N_sum = self.get_pi(t)
+        N_list = []
+        for n in pi:
+            N_list.append([pi[n],n])
+        for i in range(1, len(N_list)):
+            N_list[i][0] += N_list[i-1][0]
+        r = np.random.uniform(0, 1)
         for i in range(len(N_list)):
             if N_list[i][0] >= r:
                 return N_list[i][1]
+        print(len(self.N))
+        print(len(N_list))
+        print(len(pi))
         return N_list[-1][1]
     
     def draw(self,x,y,flag):
@@ -232,7 +249,8 @@ class MCTS:
 
 
 
-DRAWABLE_MODE = True
+DRAWABLE_MODE = False
+BS = 3
 
 if DRAWABLE_MODE == True:
     mcts = MCTS(3)
@@ -240,14 +258,28 @@ if DRAWABLE_MODE == True:
 
     def _mouse_left_up(event):
         global next_node
+        global mcts
         x, y = event.x, event.y
 
         print(next_node)
         for i in range(16):
             mcts.search(next_node)
+
+        orig_board = next_node.state.board
         next_node = mcts.play(next_node, 0.7)
-        # check if game ended using next_node
+        next_board = next_node.state.board
+        
+        nb = np.asarray(next_board)
+        ob = np.asarray(orig_board)
+        idx = np.argmax(nb - ob)
+        r = idx // BS
+        c = idx % BS
         mcts.draw()
+        
+        if is_game_ended(next_board, next_node.state.turn(), 3, BS, r, c):
+            mcts = MCTS(3)
+            next_node = mcts.root
+
 
     def _draw_circle(self, x, y, r, **kwargs):
         return self.create_oval(x-r, y-r, x+r, y+r, **kwargs)
@@ -256,7 +288,12 @@ if DRAWABLE_MODE == True:
     mcts_tk = tk.Tk()
     mcts_tk.resizable(width=False, height=False)
     mcts_tk.bind('<ButtonRelease-1>', _mouse_left_up)
-    mcts_canvas = tk.Canvas(mcts_tk, width=MCTS_WINDOW_WIDTH, height=MCTS_WINDOW_HEIGHT, borderwidth=0, highlightthickness=0, bg="black")
+    mcts_canvas = tk.Canvas(mcts_tk, \
+                            width=MCTS_WINDOW_WIDTH, \
+                            height=MCTS_WINDOW_HEIGHT, \
+                            borderwidth=0, \
+                            highlightthickness=0, \
+                            bg="black")
     mcts_canvas.grid()
 
     mcts.draw()
@@ -266,18 +303,54 @@ if DRAWABLE_MODE == True:
     mcts_tk.mainloop()
 
 else:
-    for iteration in range(25000):
-        mcts = MCTS(3)
-        next_node = mcts.root
+    for iteration in range(25):#000):
+        mcts = MCTS(BS)
+        node = mcts.root
         print("iter: ", iteration)
         
+        input_list = []
+        pi_list = []
+        z_list = []
         while True:
-            for i in range(1600):
-                mcts.search(next_node)
-            # save pi MCTS(next_node) and state of next_node
-            next_node = mcts.play(next_node, 0.7)
-            # check if game ended using state of next_node
-                # save z
-                # break
-        # train network using states, pi, z
+            for i in range(4):#1600):
+                mcts.search(node)
+            orig_state = node.state
+            orig_board = orig_state.board
+            input_board = preproc_board(orig_board, BS, orig_state.turn())
+            input_list.append(input_board[0])
+            
+            pi = np.zeros([BS * BS])
+            n_list, n_sum = node.get_pi(0.7)
+            for n in n_list:
+                nb = np.asarray(n.state.board)
+                ob = np.asarray(node.state.board)
+                idx = np.argmax(nb - ob)
+                pi[idx] = n_list[n]
+            pi_list.append(pi)
+            
+            node = mcts.play(node, 0.7)
+            
+            next_state = node.state
+            next_board = next_state.board
+            
+            nb = np.asarray(next_board)
+            ob = np.asarray(orig_board)
+            idx = np.argmax(nb - ob)
+            r = idx // BS
+            c = idx % BS
+            if is_game_ended(next_board, next_state.turn(), 3, BS, r, c):
+                z_list.append([next_state.turn()%2*2-1])
+                break
+        
+        input_list = np.asarray(input_list)
+        pi_list = np.asarray(pi_list)
+        z_list = np.asarray(z_list)
 
+        print('==========input========')
+        print(input_list.tolist())
+        print('============pi=========')
+        print(pi_list.tolist())
+        print('============z==========')
+        print(z_list.tolist())
+        print('=======================')
+        network.train(input_list, pi_list, z_list) 
