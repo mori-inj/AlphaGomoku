@@ -45,7 +45,7 @@ def ValueOutputBlock(x, board_size):
 
 
 class Network:
-    def __init__(self, board_size, input_frame_num, residual_num):
+    def __init__(self, board_size, input_frame_num, residual_num, is_trainable):
         self.board_size = board_size
         self.input_frame_num = input_frame_num
         self.residual_num = residual_num
@@ -77,9 +77,15 @@ class Network:
             optimizer = tf.train.MomentumOptimizer(learning_rate, 0.9)
             self.train_model = optimizer.minimize(self.loss)
             self.init = tf.global_variables_initializer()
+            
+            self.saver = tf.train.Saver()
+
 
         self.sess = tf.Session(graph = self.g)
-        self.sess.run(self.init)
+        if is_trainable == True:
+            self.sess.run(self.init)
+        else:
+            self.saver.restore(self.sess,"./AlphaGomoku.ckpt")
 
     def train(self, X_, pi_, Z_, it):
         for i in range(it): # TODO should change # of iteration steps
@@ -90,6 +96,7 @@ class Network:
                 print('loss: ' , l)
                 print('policy loss: ', pl)
                 print('value loss: ', vl)
+                save_path = self.saver.save(self.sess,"./AlphaGomoku.ckpt")
 
     def get_output(self, X_):
         return self.sess.run([self.P, self.V], feed_dict={self.X: X_})

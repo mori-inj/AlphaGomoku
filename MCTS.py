@@ -4,7 +4,14 @@ import copy
 import tkinter as tk
 import random
 
-network = Network(board_size = 3, input_frame_num = 5, residual_num = 10)
+
+DRAWABLE_MODE = False
+BS = BOARD_SIZE
+MCTS_SEARCH_NUM = 64
+SELF_PLAY_NUM = 100
+TRAIN_ITER = 50
+network = Network(board_size = 3, input_frame_num = 5, residual_num = 10, is_trainable=not DRAWABLE_MODE)
+
 # input_frame_num = 5 means, past 2 mover per each player + 1
 
 MCTS_WINDOW_WIDTH = 1600
@@ -249,8 +256,6 @@ class MCTS:
 
 
 
-DRAWABLE_MODE = False
-BS = BOARD_SIZE
 
 if DRAWABLE_MODE == True:
     mcts = MCTS(BS)
@@ -262,7 +267,7 @@ if DRAWABLE_MODE == True:
         x, y = event.x, event.y
 
         print(next_node)
-        for i in range(10): #16
+        for i in range(MCTS_SEARCH_NUM):
             mcts.search(next_node)
 
         orig_board = next_node.state.board
@@ -310,7 +315,7 @@ if DRAWABLE_MODE == True:
     mcts_tk.mainloop()
 
 else:
-    for iteration in range(25000):
+    for iteration in range(SELF_PLAY_NUM):
         mcts = MCTS(BS)
         node = mcts.root
         print("iter: ", iteration)
@@ -319,7 +324,7 @@ else:
         pi_list = []
         z_list = []
         while True:
-            for i in range(1600):
+            for i in range(MCTS_SEARCH_NUM):
                 mcts.search(node)
             orig_state = node.state
             orig_board = orig_state.board
@@ -365,4 +370,4 @@ else:
         print(z_list.tolist())
         print('=======================')
         """
-        network.train(input_list, pi_list, z_list, 20) 
+        network.train(input_list, pi_list, z_list, TRAIN_ITER) 
