@@ -55,6 +55,7 @@ class Network:
             self.X = tf.placeholder(tf.float32, [None, self.board_size, self.board_size, self.input_frame_num])
             self.pi = tf.placeholder(tf.float32, [None, self.board_size**2])
             self.Z = tf.placeholder(tf.float32, [None, 1])
+            self.T = tf.placeholder(tf.float32, [None, 1])
 
             X = ConvBlock(self.X)
             
@@ -68,7 +69,7 @@ class Network:
             var = tf.trainable_variables()
             theta = tf.add_n([tf.nn.l2_loss(v) for v in var]) * 1e-4
             self.value_loss = (self.Z - self.V)**2
-            self.policy_loss = - self.pi * tf.log(tf.maximum(self.P,1e-7))
+            self.policy_loss = - tf.pow(self.pi, self.T) * tf.log(tf.maximum(self.P,1e-7))
             self.loss = tf.reduce_mean(self.value_loss + self.policy_loss + theta)
             self.vl = tf.reduce_mean(self.value_loss)
             self.pl = tf.reduce_mean(self.policy_loss)
@@ -87,12 +88,13 @@ class Network:
         else:
             self.saver.restore(self.sess,"./AlphaGomoku.ckpt")
 
-    def train(self, X_, pi_, Z_, it):
+    def train(self, X_, pi_, Z_, T_, it):
         for i in range(it): # TODO should change # of iteration steps
-            self.sess.run(self.train_model, feed_dict={self.X: X_, self.pi: pi_, self.Z: Z_})
-            if i % 10 == 0:
+            fd = {self.X: X_, self.pi: pi_, self.Z: Z_, self.T: T_}
+            self.sess.run(self.train_model, feed_dict=fd)
+            if i % 20 == 0:
                 print('======= ' + str(i) + ' =======')
-                l, pl, vl = self.sess.run([self.loss, self.pl, self.vl], feed_dict={self.X: X_, self.pi: pi_, self.Z: Z_})
+                l, pl, vl = self.sess.run([self.loss, self.pl, self.vl], feed_dict=fd)
                 print('loss: ' , l)
                 print('policy loss: ', pl)
                 print('value loss: ', vl)

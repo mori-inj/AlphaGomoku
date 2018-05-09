@@ -7,10 +7,10 @@ import random
 
 DRAWABLE_MODE = False
 BS = BOARD_SIZE
-MCTS_SEARCH_NUM = 64
-SELF_PLAY_NUM = 100
-TRAIN_ITER = 50
-network = Network(board_size = 3, input_frame_num = 5, residual_num = 10, is_trainable=not DRAWABLE_MODE)
+MCTS_SEARCH_NUM = 160
+SELF_PLAY_NUM = 25000
+TRAIN_ITER = 100
+network = Network(board_size = 3, input_frame_num = 5, residual_num = 19, is_trainable=not DRAWABLE_MODE)
 
 # input_frame_num = 5 means, past 2 mover per each player + 1
 
@@ -315,14 +315,17 @@ if DRAWABLE_MODE == True:
     mcts_tk.mainloop()
 
 else:
+    input_list = []
+    pi_list = []
+    z_list = []
+    t_list = []
+
     for iteration in range(SELF_PLAY_NUM):
         mcts = MCTS(BS)
         node = mcts.root
+        print("==================================================")
         print("iter: ", iteration)
         
-        input_list = []
-        pi_list = []
-        z_list = []
         while True:
             for i in range(MCTS_SEARCH_NUM):
                 mcts.search(node)
@@ -351,16 +354,30 @@ else:
             r = idx // BS
             c = idx % BS
             if is_game_ended(next_board, next_state.turn(), N_IN_A_ROW, BS, r, c):
-                z_list.append([next_state.turn()%2*2-1])
+                for _ in range(len(input_list)):
+                    z_list.append([next_state.turn()%2*2-1])
+                    t_list.append([float(next_state.turn())])
                 break
             if next_state.turn() == BS*BS:
-                z_list.append([0])
+                for _ in range(len(input_list)):
+                    z_list.append([0])
+                    t_list.append([float(next_state.turn())])
                 break
 
-        
-        input_list = np.asarray(input_list)
-        pi_list = np.asarray(pi_list)
-        z_list = np.asarray(z_list)
+        l = len(input_list) - 9
+        index = []
+        i = random.randrange(0, max(1, len(input_list)//1000))
+        while i < l:
+            index.append(i)
+            i += random.randrange(1, max(2, len(input_list)//1000))
+        while i < len(input_list):
+            index.append(i)
+            i += 1
+        print(index)
+        input_ = np.asarray([input_list[idx] for idx in index])
+        pi_ = np.asarray([pi_list[idx] for idx in index])
+        z_ = np.asarray([z_list[idx] for idx in index])
+        t_ = np.asarray([t_list[idx] for idx in index])
         """
         print('==========input========')
         print(input_list.tolist())
@@ -370,4 +387,4 @@ else:
         print(z_list.tolist())
         print('=======================')
         """
-        network.train(input_list, pi_list, z_list, TRAIN_ITER) 
+        network.train(input_, pi_, z_, t_, TRAIN_ITER) 
