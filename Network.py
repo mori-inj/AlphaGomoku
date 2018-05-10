@@ -74,7 +74,7 @@ class Network:
             self.vl = tf.reduce_mean(self.value_loss)
             self.pl = tf.reduce_mean(self.policy_loss)
             
-            learning_rate = 0.02 # TODO apply learning step anneling
+            learning_rate = 0.001 #0.02 # TODO apply learning step anneling
             optimizer = tf.train.MomentumOptimizer(learning_rate, 0.9)
             self.train_model = optimizer.minimize(self.loss)
             self.init = tf.global_variables_initializer()
@@ -92,7 +92,7 @@ class Network:
         for i in range(it): # TODO should change # of iteration steps
             fd = {self.X: X_, self.pi: pi_, self.Z: Z_, self.T: T_}
             self.sess.run(self.train_model, feed_dict=fd)
-            if i % 20 == 0:
+            if i % 500 == 0:
                 print('======= ' + str(i) + ' =======')
                 l, pl, vl = self.sess.run([self.loss, self.pl, self.vl], feed_dict=fd)
                 print('loss: ' , l)

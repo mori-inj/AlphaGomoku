@@ -7,10 +7,10 @@ import random
 
 DRAWABLE_MODE = False
 BS = BOARD_SIZE
-MCTS_SEARCH_NUM = 160
-SELF_PLAY_NUM = 25000
+MCTS_SEARCH_NUM = 32
+SELF_PLAY_NUM = 3
 TRAIN_ITER = 100
-network = Network(board_size = 3, input_frame_num = 5, residual_num = 19, is_trainable=not DRAWABLE_MODE)
+network = Network(board_size = 3, input_frame_num = 5, residual_num = 9, is_trainable=not DRAWABLE_MODE)
 
 # input_frame_num = 5 means, past 2 mover per each player + 1
 
@@ -68,6 +68,7 @@ class Node:
         self.state = state
         self.child_list = []
         self.N = {}
+        self.N_sum = 0
         self.Q = {}
         self.W = {}
         self.P = {}
@@ -84,23 +85,15 @@ class Node:
     def select(self):
         max_Q_U = -1
         max_child = self
-        N_sum = 0
-        for n in self.N:
-            N_sum += self.N[n]
+        N_sum = self.N_sum
         
-        U_dict = {}
+        Q_U_dict = {}
         for child in self.child_list:
             U = 5 * self.P[child] * N_sum**0.5 / (1+self.N[child])
-            U_dict[child] = self.Q[child] + U
-            if max_Q_U < self.Q[child] + U:
-                max_Q_U = self.Q[child] + U
+            Q_U_dict[child] = self.Q[child] + U
         
-        max_child_list = []
-        for u in U_dict:
-            if abs(U_dict[u] - max_Q_U) < 1e-4:
-                max_child_list.append(u)
-        if len(max_child_list) > 0:
-            max_child = random.choice(max_child_list)
+        if len(Q_U_dict) > 0:
+            max_child = max(Q_U_dict, key=Q_U_dict.get)
         return max_child
 
     def expand(self, get_next_states):
@@ -188,6 +181,7 @@ class Node:
 
     def backup(self, v, child):
         self.N[child] += 1
+        self.N_sum += 1
         self.W[child] += v
         self.Q[child] = self.W[child] / self.N[child]
         if self.parent != None:
