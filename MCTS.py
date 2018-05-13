@@ -7,10 +7,11 @@ import random
 
 DRAWABLE_MODE = False
 BS = BOARD_SIZE
-MCTS_SEARCH_NUM = 32
-SELF_PLAY_NUM = 3
-TRAIN_ITER = 100
-network = Network(board_size = 3, input_frame_num = 5, residual_num = 9, is_trainable=not DRAWABLE_MODE)
+MCTS_SEARCH_NUM = 16 #1600
+SELF_PLAY_NUM = 250 #25000
+TRAIN_ITER = 400
+PRINT_ITER = 200
+network = Network(board_size = 3, input_frame_num = 5, residual_num = 9, is_trainable=False) #not DRAWABLE_MODE)
 
 # input_frame_num = 5 means, past 2 mover per each player + 1
 
@@ -189,15 +190,15 @@ class Node:
     
     def get_pi(self, t):
         pi = {}
-        N_sum = 0
+        N_s = 0
         for n in self.N:
             pi[n] = self.N[n] ** (1/t)
-            N_sum += pi[n]
+            N_s += pi[n]
         
         for n in pi:
-            pi[n] /= N_sum
+            pi[n] /= N_s
 
-        return pi, N_sum
+        return pi, N_s
 
     def play(self, t):
         pi, N_sum = self.get_pi(t)
@@ -348,16 +349,70 @@ else:
             r = idx // BS
             c = idx % BS
             if is_game_ended(next_board, next_state.turn(), N_IN_A_ROW, BS, r, c):
-                for _ in range(len(input_list)):
-                    z_list.append([next_state.turn()%2*2-1])
+                input_board = preproc_board(next_board, BS, next_state.turn())
+                input_list.append(input_board[0])
+                pi = np.zeros([BS * BS])
+                n_list, n_sum = node.get_pi(0.7)
+                for n in n_list:
+                    nb = np.asarray(n.state.board)
+                    ob = np.asarray(node.state.board)
+                    idx = np.argmax(nb - ob)
+                    pi[idx] = n_list[n]
+                pi_list.append(pi)
+                nst = int(next_state.turn() + 1)
+                for _ in range(nst):
+                    if _ %2*2-1 == next_state.turn()%2*2-1:
+                    	z_list.append([1])
+                    else:
+                        z_list.append([-1])
                     t_list.append([float(next_state.turn())])
                 break
-            if next_state.turn() == BS*BS:
-                for _ in range(len(input_list)):
-                    z_list.append([0])
+            elif next_state.turn() == BS*BS:
+                input_board = preproc_board(next_board, BS, next_state.turn())
+                input_list.append(input_board[0])
+                pi = np.zeros([BS * BS])
+                n_list, n_sum = node.get_pi(0.7)
+                for n in n_list:
+                    nb = np.asarray(n.state.board)
+                    ob = np.asarray(node.state.board)
+                    idx = np.argmax(nb - ob)
+                    pi[idx] = n_list[n]
+                pi_list.append(pi)
+            
+                nst = int(next_state.turn() + 1)
+                for _ in range(nst):
+                    z_list.append([-1])
                     t_list.append([float(next_state.turn())])
                 break
 
+        l = len(input_list) - 9
+        index = []
+        i = random.randrange(0, max(1, len(input_list)//100))
+        while i < l:
+            index.append(i)
+            i += random.randrange(1, max(2, len(input_list)//100))
+        while i < len(input_list):
+            index.append(i)
+            i += 1
+        random.shuffle(index)
+        print(len(index))
+        input_ = np.asarray([input_list[idx] for idx in index])
+        pi_ = np.asarray([pi_list[idx] for idx in index])
+        z_ = np.asarray([z_list[idx] for idx in index])
+        t_ = np.asarray([t_list[idx] for idx in index])
+        
+        """
+        print('==========input========')
+        print(len(input_list), input_list)
+        print('============pi=========')
+        print(len(pi_list), pi_list)
+        print('============z==========')
+        print(len(z_list), z_list)
+        print('=======================')
+        """
+        network.train(input_, pi_, z_, t_, TRAIN_ITER, PRINT_ITER) 
+
+    for iteration in range(SELF_PLAY_NUM):
         l = len(input_list) - 9
         index = []
         i = random.randrange(0, max(1, len(input_list)//1000))
@@ -367,18 +422,11 @@ else:
         while i < len(input_list):
             index.append(i)
             i += 1
+        random.shuffle(index) 
         print(index)
+        
         input_ = np.asarray([input_list[idx] for idx in index])
         pi_ = np.asarray([pi_list[idx] for idx in index])
         z_ = np.asarray([z_list[idx] for idx in index])
         t_ = np.asarray([t_list[idx] for idx in index])
-        """
-        print('==========input========')
-        print(input_list.tolist())
-        print('============pi=========')
-        print(pi_list.tolist())
-        print('============z==========')
-        print(z_list.tolist())
-        print('=======================')
-        """
-        network.train(input_, pi_, z_, t_, TRAIN_ITER) 
+        network.train(input_, pi_, z_, t_, TRAIN_ITER, PRINT_ITER)
