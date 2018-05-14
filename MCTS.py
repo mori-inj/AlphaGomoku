@@ -11,7 +11,7 @@ MCTS_SEARCH_NUM = 16 #1600
 SELF_PLAY_NUM = 250 #25000
 TRAIN_ITER = 400
 PRINT_ITER = 200
-network = Network(board_size = BS, input_frame_num = 5, residual_num = 9, is_trainable=False) #not DRAWABLE_MODE)
+network = Network(board_size = BS, input_frame_num = 5, residual_num = 9, is_trainable=not DRAWABLE_MODE)
 
 # input_frame_num = 5 means, past 2 mover per each player + 1
 
