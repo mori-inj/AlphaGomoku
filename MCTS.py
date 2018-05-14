@@ -8,9 +8,11 @@ import random
 DRAWABLE_MODE = False
 BS = BOARD_SIZE
 MCTS_SEARCH_NUM = 16 #1600
-SELF_PLAY_NUM = 250 #25000
-TRAIN_ITER = 400
+SELF_PLAY_NUM = 500 #25000
+TRAIN_ITER = 1000
 PRINT_ITER = 200
+TEMPER_EPS = 1e-2
+TEMPERATURE = TEMPER_EPS
 network = Network(board_size = BS, input_frame_num = 5, residual_num = 9, is_trainable=not DRAWABLE_MODE)
 
 # input_frame_num = 5 means, past 2 mover per each player + 1
@@ -266,7 +268,7 @@ if DRAWABLE_MODE == True:
             mcts.search(next_node)
 
         orig_board = next_node.state.board
-        next_node = mcts.play(next_node, 0.7)
+        next_node = mcts.play(next_node, TEMPERATURE)
         next_board = next_node.state.board
         
         nb = np.asarray(next_board)
@@ -318,10 +320,16 @@ else:
     for iteration in range(SELF_PLAY_NUM):
         mcts = MCTS(BS)
         node = mcts.root
-        print("==================================================")
-        print("iter: ", iteration)
-        
+        print("======================= iter: " + str(iteration) + " ===========================")
+
+        turn_cnt = 0
         while True:
+            turn_cnt += 1
+            if turn_cnt <= 2:
+                TEMPERATURE = 1
+            else:
+                TEMPERATURE = TEMPER_EPS
+
             for i in range(MCTS_SEARCH_NUM):
                 mcts.search(node)
             orig_state = node.state
@@ -330,7 +338,7 @@ else:
             input_list.append(input_board[0])
             
             pi = np.zeros([BS * BS])
-            n_list, n_sum = node.get_pi(0.7)
+            n_list, n_sum = node.get_pi(TEMPERATURE)
             for n in n_list:
                 nb = np.asarray(n.state.board)
                 ob = np.asarray(node.state.board)
@@ -338,7 +346,7 @@ else:
                 pi[idx] = n_list[n]
             pi_list.append(pi)
             
-            node = mcts.play(node, 0.7)
+            node = mcts.play(node, TEMPERATURE)
             
             next_state = node.state
             next_board = next_state.board
@@ -348,11 +356,12 @@ else:
             idx = np.argmax(nb - ob)
             r = idx // BS
             c = idx % BS
+
             if is_game_ended(next_board, next_state.turn(), N_IN_A_ROW, BS, r, c):
                 input_board = preproc_board(next_board, BS, next_state.turn())
                 input_list.append(input_board[0])
                 pi = np.zeros([BS * BS])
-                n_list, n_sum = node.get_pi(0.7)
+                n_list, n_sum = node.get_pi(TEMPERATURE)
                 for n in n_list:
                     nb = np.asarray(n.state.board)
                     ob = np.asarray(node.state.board)
@@ -371,7 +380,7 @@ else:
                 input_board = preproc_board(next_board, BS, next_state.turn())
                 input_list.append(input_board[0])
                 pi = np.zeros([BS * BS])
-                n_list, n_sum = node.get_pi(0.7)
+                n_list, n_sum = node.get_pi(TEMPERATURE)
                 for n in n_list:
                     nb = np.asarray(n.state.board)
                     ob = np.asarray(node.state.board)
@@ -385,32 +394,66 @@ else:
                     t_list.append([float(next_state.turn())])
                 break
 
-        l = len(input_list) - 9
-        index = []
-        i = random.randrange(0, max(1, len(input_list)//100))
-        while i < l:
-            index.append(i)
-            i += random.randrange(1, max(2, len(input_list)//100))
-        while i < len(input_list):
-            index.append(i)
-            i += 1
-        random.shuffle(index)
-        print(len(index))
-        input_ = np.asarray([input_list[idx] for idx in index])
-        pi_ = np.asarray([pi_list[idx] for idx in index])
-        z_ = np.asarray([z_list[idx] for idx in index])
-        t_ = np.asarray([t_list[idx] for idx in index])
+        if iteration % 50 == 0:
+            l = len(input_list) - 9
+            index = []
+            i = random.randrange(0, max(1, len(input_list)//200))
+            while i < l:
+                index.append(i)
+                i += random.randrange(1, max(2, len(input_list)//200))
+            while i < len(input_list):
+                index.append(i)
+                i += 1
+            random.shuffle(index)
+            print(len(index))
+            input_ = np.asarray([input_list[idx] for idx in index])
+            pi_ = np.asarray([pi_list[idx] for idx in index])
+            z_ = np.asarray([z_list[idx] for idx in index])
+            t_ = np.asarray([t_list[idx] for idx in index])
         
-        """
+        """ 
         print('==========input========')
-        print(len(input_list), input_list)
+        print(len(input_list), np.transpose(input_list,[0,3,1,2]))
         print('============pi=========')
         print(len(pi_list), pi_list)
         print('============z==========')
         print(len(z_list), z_list)
         print('=======================')
         """
-        network.train(input_, pi_, z_, t_, TRAIN_ITER, PRINT_ITER) 
+        print(len(input_list), len(pi_list), len(z_list))
+        """
+        input_list_t = np.transpose(input_list, [0,3,1,2])
+        for i in range(len(input_list)):
+            frame = network.input_frame_num
+            bd = np.zeros([BS,BS])
+            for y in range(BS):
+                for x in range(BS):
+                    if input_list_t[i][0][y][x] == 1:
+                        bd[y][x] = 1
+                    elif input_list_t[i][(frame-1)//2][y][x] == 1:
+                        bd[y][x] = -1
+            pi_t = np.reshape(np.asarray(pi_list[i]),[BS,BS]).tolist()
+            st = ""
+            for j in range(BS):
+                for k in range(BS):
+                    if (i % 2 == 0 and bd[j][k] == 1) or (i % 2 == 1 and bd[j][k] == -1):
+                        st += "o "
+                    elif (i % 2 == 0 and bd[j][k] == -1) or (i % 2 == 1 and bd[j][k] == 1):
+                        st += "x "
+                    else:
+                        st += "  "
+                st += "    "
+                for k in range(BS):
+                    st += "%.2f " % pi_t[j][k]
+                if j != BS-1:
+                    st += "\n"
+            print(st)
+            print(z_list[i])
+            print()
+        """
+
+        if iteration % 50 == 0:
+            network.train(input_, pi_, z_, t_, TRAIN_ITER, PRINT_ITER) 
 
     for iteration in range(SELF_PLAY_NUM):
         l = len(input_list) - 9
