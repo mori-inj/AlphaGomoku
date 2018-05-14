@@ -25,6 +25,7 @@ def PolicyOutputBlock(x, board_size, output_size):
         x = tf.nn.relu(x)
         x = tf.reshape(x, [-1, 256 * board_size**2])
         x = tf.layers.dense(x, output_size, name='fc')
+        x = tf.nn.sigmoid(x)
         return x
 
 def ValueOutputBlock(x, board_size):
@@ -67,14 +68,13 @@ class Network:
            
 
             var = tf.trainable_variables()
-            theta = tf.add_n([tf.nn.l2_loss(v) for v in var]) * 1e-4
-            self.value_loss = (self.Z - self.V)**2
-            self.policy_loss = - tf.pow(self.pi, self.T) * tf.log(tf.maximum(self.P,1e-7))
-            self.loss = tf.reduce_mean(self.value_loss + self.policy_loss + theta)
-            self.vl = tf.reduce_mean(self.value_loss)
-            self.pl = tf.reduce_mean(self.policy_loss)
+            theta = tf.reduce_mean(tf.add_n([tf.nn.l2_loss(v) for v in var]) )*1e-4
+            self.value_loss = tf.reduce_mean((self.Z - self.V)**2)
+            #self.policy_loss = - tf.pow(self.pi, self.T) * tf.log(tf.maximum(self.P,1e-7))
+            self.policy_loss = tf.reduce_mean(tf.nn.softmax_cross_entropy_with_logits(labels=tf.pow(self.pi, self.T), logits=self.P))
+            self.loss = self.value_loss + self.policy_loss + theta
             
-            learning_rate = 0.001 #0.01 # TODO apply learning step anneling
+            learning_rate = 0.003 #0.01 # TODO apply learning step anneling
             optimizer = tf.train.MomentumOptimizer(learning_rate, 0.9)
             self.train_model = optimizer.minimize(self.loss)
             self.init = tf.global_variables_initializer()
@@ -94,7 +94,7 @@ class Network:
             self.sess.run(self.train_model, feed_dict=fd)
             if i % prt_it == 0:
                 print('======= ' + str(i) + ' =======')
-                l, pl, vl = self.sess.run([self.loss, self.pl, self.vl], feed_dict=fd)
+                l, pl, vl = self.sess.run([self.loss, self.policy_loss, self.value_loss], feed_dict=fd)
                 print('loss: ' , l)
                 print('policy loss: ', pl)
                 print('value loss: ', vl)

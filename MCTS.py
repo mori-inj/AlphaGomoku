@@ -456,6 +456,7 @@ else:
             network.train(input_, pi_, z_, t_, TRAIN_ITER, PRINT_ITER) 
 
     for iteration in range(SELF_PLAY_NUM):
+        print('============ iter:' + str(iteration) + '=============')
         l = len(input_list) - 9
         index = []
         i = random.randrange(0, max(1, len(input_list)//1000))
@@ -466,7 +467,6 @@ else:
             index.append(i)
             i += 1
         random.shuffle(index) 
-        print(index)
         
         input_ = np.asarray([input_list[idx] for idx in index])
         pi_ = np.asarray([pi_list[idx] for idx in index])
