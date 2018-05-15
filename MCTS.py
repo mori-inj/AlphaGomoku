@@ -7,13 +7,13 @@ import random
 
 DRAWABLE_MODE = True#False
 BS = BOARD_SIZE
-MCTS_SEARCH_NUM = 16 #1600
-SELF_PLAY_NUM = 500 #25000
+MCTS_SEARCH_NUM = 64 #1600
+SELF_PLAY_NUM = 10000 #25000
 TRAIN_ITER = 1000
 PRINT_ITER = 200
 TEMPER_EPS = 1e-2
 TEMPERATURE = TEMPER_EPS
-network = Network(board_size = BS, input_frame_num = 5, residual_num = 9, is_trainable=not DRAWABLE_MODE)
+network = Network(board_size = BS, input_frame_num = 3, residual_num = 3, is_trainable=not DRAWABLE_MODE)
 
 # input_frame_num = 5 means, past 2 mover per each player + 1
 
