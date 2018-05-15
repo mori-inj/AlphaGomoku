@@ -2,8 +2,8 @@ import numpy as np
 
 BOARD_SIZE = 3
 N_IN_A_ROW = 3
-GRID_SIZE = 25
-STONE_SIZE = 10
+GRID_SIZE = 10#25
+STONE_SIZE = 4#10
 BS = max(GRID_SIZE * (BOARD_SIZE -1) + STONE_SIZE + 16 + BOARD_SIZE*3, 170)
 HEIGHT = BS
 WIDTH = BS
@@ -45,7 +45,7 @@ def draw_board(canvas, sx, sy, board, node=None, parent=None, selected=None):
         txt += "W:%.2f\n" % parent.W[node]
         txt += "Q:%.2f\n" % parent.Q[node]
         txt += "P:%.2f\n" % parent.P[node]
-        ci = canvas.create_text(sx, sy+bs, anchor="nw", fill="#FFF", text=txt)
+        ci = canvas.create_text(sx, sy+bs, anchor="nw", fill="#FFF", font=("Purisa", 10), text=txt)
 
 
 
