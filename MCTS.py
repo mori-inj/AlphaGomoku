@@ -5,7 +5,7 @@ import tkinter as tk
 import random
 
 
-DRAWABLE_MODE = False
+DRAWABLE_MODE = True#False
 BS = BOARD_SIZE
 MCTS_SEARCH_NUM = 64 #1600
 SELF_PLAY_NUM = 5000 #25000
@@ -18,7 +18,7 @@ network = Network(board_size = BS, input_frame_num = 3, residual_num = 9, is_tra
 # input_frame_num = 5 means, past 2 mover per each player + 1
 
 MCTS_WINDOW_WIDTH = 1600
-MCTS_WINDOW_HEIGHT = 1000
+MCTS_WINDOW_HEIGHT = 800
 
 def get_next_board_state(state):
     sl = []
@@ -222,12 +222,12 @@ class Node:
         draw_board(mcts_canvas, x, y, self.state, self, self.parent, flag)
         if flag == False:
             return
-        p = 20
-        s = x #MCTS_WINDOW_WIDTH/2
+        p = 70
+        s = MCTS_WINDOW_HEIGHT/2
         s -= (len(self.child_list) * (bs + p) + p) / 2
         i = 0
         for child in self.child_list:
-            child.draw(s + p + (bs+p) * i, y + bs + 90, child==self.selected_child)
+            child.draw(x + bs + 90, s + p + (bs+p) * i, child==self.selected_child)
             i += 1
 
 class MCTS:
@@ -249,7 +249,7 @@ class MCTS:
     def draw(self):
         mcts_canvas.delete("all")
         mcts_canvas.create_rectangle(0, 0, MCTS_WINDOW_WIDTH, MCTS_WINDOW_HEIGHT, fill="#000")
-        self.root.draw(MCTS_WINDOW_WIDTH/2 - bs/2, 10, True)
+        self.root.draw(10, MCTS_WINDOW_HEIGHT/2 - bs/2, True)
 
 
 
