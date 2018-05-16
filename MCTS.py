@@ -1,14 +1,13 @@
 from Network import Network
 from Gomoku import *
-import copy
 import tkinter as tk
 import random
 import math
 
 
-DRAWABLE_MODE = False#True
+DRAWABLE_MODE = True
 BS = BOARD_SIZE
-MCTS_SEARCH_NUM = 64 #1600
+MCTS_SEARCH_NUM = 1600
 SELF_PLAY_NUM = 5000 #25000
 SELF_PLAY_ITER = 50
 TRAIN_ITER = 1000
@@ -32,18 +31,16 @@ def get_next_board_state(state):
     for i in range(BS):
         for j in range(BS):
             if state[i][j] == 0:
-                new_state = copy.deepcopy(state)
+                new_state = BoardState(state.board_size, turn, i, j)
+                new_state.board = np.copy(state.board)
                 new_state[i][j] = turn
-                new_state.turn = turn
-                new_state.last_row = i
-                new_state.last_col = j
                 sl.append(new_state)
     return sl
 
 def preproc_board(board, turn):
     frame = network.input_frame_num
     
-    s = []
+    s = [0] * frame
     for fn in range((frame-1)//2):
         f = np.zeros([BS, BS])
         for i in range(BS):
@@ -51,7 +48,7 @@ def preproc_board(board, turn):
                 if board[i][j] > 0 and board[i][j] % 2 == turn % 2 and \
                     board[i][j] <= turn - fn*2:
                     f[i][j] = 1
-        s.append(f)
+        s[fn] = f
     
     for fn in range((frame-1)//2):
         f = np.zeros([BS, BS])
@@ -60,12 +57,12 @@ def preproc_board(board, turn):
                 if board[i][j] > 0 and board[i][j] % 2 != turn % 2 and \
                     board[i][j] <= turn - fn*2:
                     f[i][j] = 1
-        s.append(f)
+        s[fn + (frame-1)//2] = f
 
     if turn % 2 == 0:
-        s.append(np.zeros([BS, BS]))
+        s[-1] = np.zeros([BS, BS]) #s.append(np.zeros([BS, BS]))
     else:
-        s.append(np.ones([BS, BS]))
+        s[-1] = np.ones([BS, BS]) #s.append(np.ones([BS, BS]))
     
     s = np.asarray([s])
     s = np.transpose(s, [0, 2, 3, 1])
