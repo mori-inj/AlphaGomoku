@@ -5,9 +5,9 @@ import tkinter as tk
 import random
 
 
-DRAWABLE_MODE = False
+DRAWABLE_MODE = True
 BS = BOARD_SIZE
-MCTS_SEARCH_NUM = 64 #1600
+MCTS_SEARCH_NUM = 256 #1600
 SELF_PLAY_NUM = 5000 #25000
 SELF_PLAY_ITER = 50
 TRAIN_ITER = 1000
@@ -16,7 +16,7 @@ TEMPER_EPS = 1e-2
 SELF_PLAY_BATCH_SIZE = 200
 TRAIN_BATCH_SIZE = 1000
 TEMPERATURE = TEMPER_EPS
-network = Network(board_size = BS, input_frame_num = 3, residual_num = 9, is_trainable=not DRAWABLE_MODE)
+network = Network(board_size = BS, input_frame_num = 3, residual_num = 9, is_trainable=True)#not DRAWABLE_MODE)
 
 # input_frame_num = 5 means, past 2 mover per each player + 1
 
@@ -95,14 +95,15 @@ class Node:
         max_child = self
         N_sum = self.N_sum
         
+        if len(self.child_list) == 0:
+            return max_child
+
         Q_U_dict = {}
         for child in self.child_list:
             U = 5 * self.P[child] * N_sum**0.5 / (1 + self.N[child])
             Q_U_dict[child] = self.Q[child] + U
         
-        if len(Q_U_dict) > 0:
-            max_child = max(Q_U_dict, key=Q_U_dict.get)
-        return max_child
+        return max(Q_U_dict, key=Q_U_dict.get)
 
     def expand(self, get_next_states):
         if is_game_ended(self.state.board):
@@ -312,8 +313,8 @@ else:
             
             next_state = node.state
             next_board = next_state.board 
-            r = next_board.last_row
-            c = next_board.last_col
+            r = next_state.last_row
+            c = next_state.last_col
 
             if is_game_ended(next_board):
                 input_board = preproc_board(next_board, next_state.turn)
