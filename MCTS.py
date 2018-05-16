@@ -9,56 +9,59 @@ DRAWABLE_MODE = True#False
 BS = BOARD_SIZE
 MCTS_SEARCH_NUM = 64 #1600
 SELF_PLAY_NUM = 5000 #25000
+SELF_PLAY_ITER = 50
 TRAIN_ITER = 1000
 PRINT_ITER = 200
 TEMPER_EPS = 1e-2
 TEMPERATURE = TEMPER_EPS
-network = Network(board_size = BS, input_frame_num = 3, residual_num = 9, is_trainable=not DRAWABLE_MODE)
+network = Network(board_size = BS, input_frame_num = 3, residual_num = 9, is_trainable=True)#not DRAWABLE_MODE)
 
 # input_frame_num = 5 means, past 2 mover per each player + 1
 
 MCTS_WINDOW_WIDTH = 1600
-MCTS_WINDOW_HEIGHT = 800
+MCTS_WINDOW_HEIGHT = 1000
 
 def get_next_board_state(state):
     sl = []
-    board_size = state.board_size
-    turn = state.turn() + 1
+    turn = state.turn + 1
 
-    for i in range(board_size):
-        for j in range(board_size):
+    for i in range(BS):
+        for j in range(BS):
             if state[i][j] == 0:
                 new_state = copy.deepcopy(state)
                 new_state[i][j] = turn
+                new_state.turn = turn
+                new_state.last_row = i
+                new_state.last_col = j
                 sl.append(new_state)
     return sl
 
-def preproc_board(board, bs, turn):
+def preproc_board(board, turn):
     frame = network.input_frame_num
     
     s = []
     for fn in range((frame-1)//2):
-        f = np.zeros([bs,bs])
-        for i in range(bs):
-            for j in range(bs):
+        f = np.zeros([BS, BS])
+        for i in range(BS):
+            for j in range(BS):
                 if board[i][j] > 0 and board[i][j] % 2 == turn % 2 and \
                     board[i][j] <= turn - fn*2:
                     f[i][j] = 1
         s.append(f)
     
     for fn in range((frame-1)//2):
-        f = np.zeros([bs,bs])
-        for i in range(bs):
-            for j in range(bs):
+        f = np.zeros([BS, BS])
+        for i in range(BS):
+            for j in range(BS):
                 if board[i][j] > 0 and board[i][j] % 2 != turn % 2 and \
                     board[i][j] <= turn - fn*2:
                     f[i][j] = 1
         s.append(f)
 
     if turn % 2 == 0:
-        s.append(np.zeros([bs, bs]))
+        s.append(np.zeros([BS, BS]))
     else:
-        s.append(np.ones([bs, bs]))
+        s.append(np.ones([BS, BS]))
     
     s = np.asarray([s])
     s = np.transpose(s, [0, 2, 3, 1])
@@ -100,6 +103,12 @@ class Node:
         return max_child
 
     def expand(self, get_next_states):
+        if is_game_ended(self.state.board):
+            _,v = self.evaluate(self.state, [])
+            if self.parent != None:
+                self.parent.backup(v, self)
+            return
+
         state_list = get_next_states(self.state)
         p,v = self.evaluate(self.state, state_list)
         for state in state_list:
@@ -133,55 +142,18 @@ class Node:
     def evaluate(self, state, state_list):
         i = random.randrange(1, 9)
         board = self.dihedral_reflection(i, np.asarray(state.board))
-        bs = state.board_size
-        turn = state.turn()
-        s = preproc_board(board, bs, turn)
+        turn = state.turn
+        s = preproc_board(board, turn)
         p,v = network.get_output(s)
-        p = np.reshape(p,(bs,bs))
+        p = np.reshape(p,(BS, BS))
         p = self.dihedral_reflection(-i, p)
         p_dict = {}
         for new_state in state_list:
-            ns = np.asarray(new_state.board)
-            s = np.asarray(state.board)
-            idx = np.argmax(ns - s)
-            p_dict[new_state] = p[idx//bs][idx%bs]
+            r = new_state.last_row
+            c = new_state.last_col
+            p_dict[new_state] = p[r][c]
         return p_dict,v
-        """
-        board = np.zeros([3,3]).tolist()
-        for i in range(3):
-            for j in range(3):
-                board[i][j] = state[i][j]%2*2-1
-        v = 0
-        for i in range(3):
-            a = 0
-            b = 0
-            for j in range(3):
-                if board[i][j] > 0:
-                    a += 1
-                elif board[i][j] < 0:
-                    b += 1
-            v += 2**a - 2**b
-        for i in range(3):
-            a = 0
-            b = 0
-            for j in range(3):
-                if board[j][i] > 0:
-                    a += 1
-                elif board[j][i] < 0:
-                    b += 1
-            v += 2**a - 2**b
-        p = [[0.1,0.2,0.3],[0.4,0.5,0.6],[0.7,0.8,0.9]]
-        p_dict = {}
-        for new_state in state_list:
-            ns = np.asarray(new_state.board)
-            s = np.asarray(state.board)
-            idx = np.argmax(ns - s)
-            bs = state.board_size
-            p_dict[new_state] = p[idx//bs][idx%bs]
-
-        return p_dict, (v / (8*6) + 1 ) / 2
-        """
-
+        
     def backup(self, v, child):
         self.N[child] += 1
         self.N_sum += 1
@@ -222,18 +194,18 @@ class Node:
         draw_board(mcts_canvas, x, y, self.state, self, self.parent, flag)
         if flag == False:
             return
-        p = 70
+        p = 60
         s = MCTS_WINDOW_HEIGHT/2
-        s -= (len(self.child_list) * (bs + p) + p) / 2
+        s -= (len(self.child_list) * (bs+p)) / 2
         i = 0
         for child in self.child_list:
-            child.draw(x + bs + 90, s + p + (bs+p) * i, child==self.selected_child)
+            child.draw(x + bs + p, s + (bs+p) * i, child==self.selected_child)
             i += 1
 
 class MCTS:
     def __init__(self, board_size):
         self.board_size = board_size
-        self.root = Node(BoardState(board_size))
+        self.root = Node(BoardState(board_size, 0))
 
     def search(self, node=None):
         if node == None:
@@ -249,7 +221,7 @@ class MCTS:
     def draw(self):
         mcts_canvas.delete("all")
         mcts_canvas.create_rectangle(0, 0, MCTS_WINDOW_WIDTH, MCTS_WINDOW_HEIGHT, fill="#000")
-        self.root.draw(10, MCTS_WINDOW_HEIGHT/2 - bs/2, True)
+        self.root.draw(10, MCTS_WINDOW_HEIGHT/2 - BS/2, True)
 
 
 
@@ -264,26 +236,21 @@ if DRAWABLE_MODE == True:
         x, y = event.x, event.y
 
         print(next_node)
-        for i in range(MCTS_SEARCH_NUM):
+        for i in range(MCTS_SEARCH_NUM): #FIXME step by step
             mcts.search(next_node)
 
         orig_board = next_node.state.board
         next_node = mcts.play(next_node, TEMPERATURE)
         next_board = next_node.state.board
         
-        nb = np.asarray(next_board)
-        ob = np.asarray(orig_board)
-        idx = np.argmax(nb - ob)
-        r = idx // BS
-        c = idx % BS
         mcts.draw()
         
-        if is_game_ended(next_board, next_node.state.turn(), N_IN_A_ROW, BS, r, c):
+        if is_game_ended(next_board):
             mcts = MCTS(BS)
             next_node = mcts.root
             print('===============================')
         
-        if next_node.state.turn() == BS*BS:
+        if next_node.state.turn == BS*BS:
             mcts = MCTS(BS)
             next_node = mcts.root
             print('===============================')
@@ -334,15 +301,13 @@ else:
                 mcts.search(node)
             orig_state = node.state
             orig_board = orig_state.board
-            input_board = preproc_board(orig_board, BS, orig_state.turn())
+            input_board = preproc_board(orig_board, orig_state.turn)
             input_list.append(input_board[0])
             
             pi = np.zeros([BS * BS])
             n_list, n_sum = node.get_pi(TEMPERATURE)
             for n in n_list:
-                nb = np.asarray(n.state.board)
-                ob = np.asarray(node.state.board)
-                idx = np.argmax(nb - ob)
+                idx = n.state.last_row * BS + n.state.last_col
                 pi[idx] = n_list[n]
             pi_list.append(pi)
             
@@ -351,50 +316,43 @@ else:
             next_state = node.state
             next_board = next_state.board
             
-            nb = np.asarray(next_board)
-            ob = np.asarray(orig_board)
-            idx = np.argmax(nb - ob)
-            r = idx // BS
-            c = idx % BS
+            r = next_board.last_row
+            c = next_board.last_col
 
-            if is_game_ended(next_board, next_state.turn(), N_IN_A_ROW, BS, r, c):
-                input_board = preproc_board(next_board, BS, next_state.turn())
+            if is_game_ended(next_board):
+                input_board = preproc_board(next_board, next_state.turn)
                 input_list.append(input_board[0])
                 pi = np.zeros([BS * BS])
                 n_list, n_sum = node.get_pi(TEMPERATURE)
                 for n in n_list:
-                    nb = np.asarray(n.state.board)
-                    ob = np.asarray(node.state.board)
-                    idx = np.argmax(nb - ob)
+                    idx = n.state.last_row * BS + n.state.last_col
                     pi[idx] = n_list[n]
                 pi_list.append(pi)
-                nst = int(next_state.turn() + 1)
+                nst = int(next_state.turn + 1)
                 for _ in range(nst):
-                    if _ %2*2-1 == next_state.turn()%2*2-1:
+                    if _ %2*2-1 == next_state.turn%2*2-1:
                     	z_list.append([1])
                     else:
                         z_list.append([-1])
-                    t_list.append([float(next_state.turn())])
+                    t_list.append([float(next_state.turn)])
                 break
-            elif next_state.turn() == BS*BS:
-                input_board = preproc_board(next_board, BS, next_state.turn())
+            elif next_state.turn == BS*BS:
+                input_board = preproc_board(next_board, next_state.turn)
                 input_list.append(input_board[0])
                 pi = np.zeros([BS * BS])
                 n_list, n_sum = node.get_pi(TEMPERATURE)
                 for n in n_list:
-                    nb = np.asarray(n.state.board)
-                    ob = np.asarray(node.state.board)
-                    idx = np.argmax(nb - ob)
+                    idx = n.state.last_row * BS + n.state.last_col
                     pi[idx] = n_list[n]
                 pi_list.append(pi)
             
-                nst = int(next_state.turn() + 1)
+                nst = int(next_state.turn + 1)
                 for _ in range(nst):
                     z_list.append([-1])
-                    t_list.append([float(next_state.turn())])
+                    t_list.append([float(next_state.turn)])
                 break
 
-        if iteration % 50 == 0:
+        if iteration % SELF_PLAY_ITER == 0:
             l = len(input_list) - 9
             index = []
             i = random.randrange(0, max(1, len(input_list)//200))
@@ -452,7 +410,7 @@ else:
             print()
         """
 
-        if iteration % 50 == 0:
+        if iteration % SELF_PLAY_ITER == 0:
             network.train(input_, pi_, z_, t_, TRAIN_ITER, PRINT_ITER) 
 
     for iteration in range(SELF_PLAY_NUM):

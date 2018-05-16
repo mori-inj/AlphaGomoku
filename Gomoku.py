@@ -2,15 +2,15 @@ import numpy as np
 
 BOARD_SIZE = 3
 N_IN_A_ROW = 3
-GRID_SIZE = 10#25
-STONE_SIZE = 4#10
-BS = max(GRID_SIZE * (BOARD_SIZE -1) + STONE_SIZE + 16 + BOARD_SIZE*3, 170)
-HEIGHT = BS
-WIDTH = BS
+GRID_SIZE = 15#25
+STONE_SIZE = 6#10
+BDS = max(GRID_SIZE * (BOARD_SIZE -1) + STONE_SIZE + 16 + BOARD_SIZE*3, 170)
+HEIGHT = BDS
+WIDTH = BDS
 
 bs = (GRID_SIZE) * (BOARD_SIZE-1) + 1
-SX = int(BS/2 - bs/2.0)
-SY= int(BS/2 - bs/2.0)
+SX = int(BDS/2 - bs/2.0)
+SY= int(BDS/2 - bs/2.0)
 EX = SX + bs
 EY = SY + bs
 
@@ -49,19 +49,21 @@ def draw_board(canvas, sx, sy, board, node=None, parent=None, selected=None):
 
 
 
-def is_game_ended(board, turn, N_IN_A_ROW, BOARD_SIZE, row=-1, col=-1):
-    if row < 0 and col < 0:
-        if turn==0:
-            return False
-        for i in range(BOARD_SIZE):
-            for j in range(BOARD_SIZE):
-                if board[i][j] == turn:
-                    row = i
-                    col = j
-                    break
-            else:
-                continue
-            break
+def is_game_ended(board):
+    turn = np.amax(board) 
+
+    if turn==0:
+        return False
+    for i in range(BOARD_SIZE):
+        for j in range(BOARD_SIZE):
+            if board[i][j] == turn:
+                row = i
+                col = j
+                break
+        else:
+            continue
+        break
+
     dx = [1, 1, 0, -1, -1, -1, 0, 1]
     dy = [0, -1, -1, -1, 0, 1, 1, 1]
     nx = col
@@ -91,9 +93,12 @@ def is_game_ended(board, turn, N_IN_A_ROW, BOARD_SIZE, row=-1, col=-1):
 
 
 class BoardState:
-    def __init__(self, board_size):
+    def __init__(self, board_size, turn, last_row = -1, last_col = -1):
         self.board_size = board_size
         self.board = np.zeros([board_size, board_size]).tolist()
+        self.turn = turn
+        self.last_row = last_row
+        self.last_col = last_col
     
     def __getitem__(self, key):
         return self.board[key]
@@ -104,8 +109,6 @@ class BoardState:
             s += self.board[i].__str__()
         return s + ']'
 
-    def turn(self):
-        return np.amax(np.asarray(self.board))
 
 class Gomoku:
     def __init__(self, board_size, n_in_a_row):
