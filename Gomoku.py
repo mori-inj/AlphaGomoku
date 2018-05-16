@@ -115,11 +115,11 @@ class Gomoku:
         self.turn = 0
         self.BOARD_SIZE = board_size
         self.N_IN_A_ROW = n_in_a_row
-        self.board = BoardState(board_size)
+        self.board = BoardState(board_size, 0)
 
    
-    def is_game_ended(self, row=-1, col=-1):
-        return is_game_ended(self.board, self.turn, self.N_IN_A_ROW, self.BOARD_SIZE, row, col)
+    def is_game_ended(self):
+        return is_game_ended(self.board.board)
 
     def is_valid_input(self, row, col):
         if not(0<=row<self.BOARD_SIZE and 0<=col<self.BOARD_SIZE):
