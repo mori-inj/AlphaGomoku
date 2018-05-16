@@ -16,6 +16,7 @@ PRINT_ITER = 200
 TEMPER_EPS = 1e-2
 SELF_PLAY_BATCH_SIZE = 200
 TRAIN_BATCH_SIZE = 1000
+C_PUCT = 5
 TEMPERATURE = TEMPER_EPS
 network = Network(board_size = BS, input_frame_num = 3, residual_num = 9, is_trainable=not DRAWABLE_MODE)
 
@@ -100,7 +101,7 @@ class Node:
             return max_child
 
         QU_max = -float('Inf')
-        const = 5 * math.sqrt(N_sum) # c_puct = 5
+        const = C_PUCT * math.sqrt(N_sum)
         for child in self.child_list:
             U = self.P[child] * const / (1 + self.N[child])
             QU = self.Q[child] + U
