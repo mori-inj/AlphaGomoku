@@ -99,12 +99,16 @@ class Node:
         if len(self.child_list) == 0:
             return max_child
 
-        Q_U_dict = {}
+        QU_max = -float('Inf')
+        const = 5 * math.sqrt(N_sum) # c_puct = 5
         for child in self.child_list:
-            U = 5 * self.P[child] * math.sqrt(N_sum) / (1 + self.N[child])
-            Q_U_dict[child] = self.Q[child] + U
+            U = self.P[child] * const / (1 + self.N[child])
+            QU = self.Q[child] + U
+            if QU_max < QU:
+                QU_max = QU
+                max_child = child
         
-        return max(Q_U_dict, key=Q_U_dict.get)
+        return max_child
 
     def expand(self, get_next_states):
         if is_game_ended(self.state.board):
