@@ -5,7 +5,7 @@ import tkinter as tk
 import random
 
 
-DRAWABLE_MODE = True#False
+DRAWABLE_MODE = False
 BS = BOARD_SIZE
 MCTS_SEARCH_NUM = 64 #1600
 SELF_PLAY_NUM = 5000 #25000
@@ -13,8 +13,10 @@ SELF_PLAY_ITER = 50
 TRAIN_ITER = 1000
 PRINT_ITER = 200
 TEMPER_EPS = 1e-2
+SELF_PLAY_BATCH_SIZE = 200
+TRAIN_BATCH_SIZE = 1000
 TEMPERATURE = TEMPER_EPS
-network = Network(board_size = BS, input_frame_num = 3, residual_num = 9, is_trainable=True)#not DRAWABLE_MODE)
+network = Network(board_size = BS, input_frame_num = 3, residual_num = 9, is_trainable=not DRAWABLE_MODE)
 
 # input_frame_num = 5 means, past 2 mover per each player + 1
 
@@ -95,7 +97,7 @@ class Node:
         
         Q_U_dict = {}
         for child in self.child_list:
-            U = 5 * self.P[child] * N_sum**0.5 / (1+self.N[child])
+            U = 5 * self.P[child] * N_sum**0.5 / (1 + self.N[child])
             Q_U_dict[child] = self.Q[child] + U
         
         if len(Q_U_dict) > 0:
@@ -145,7 +147,7 @@ class Node:
         turn = state.turn
         s = preproc_board(board, turn)
         p,v = network.get_output(s)
-        p = np.reshape(p,(BS, BS))
+        p = np.reshape(p, (BS, BS))
         p = self.dihedral_reflection(-i, p)
         p_dict = {}
         for new_state in state_list:
@@ -224,9 +226,7 @@ class MCTS:
         self.root.draw(10, MCTS_WINDOW_HEIGHT/2 - BS/2, True)
 
 
-
-
-if DRAWABLE_MODE == True:
+if DRAWABLE_MODE:
     mcts = MCTS(BS)
     next_node = mcts.root
 
@@ -255,8 +255,6 @@ if DRAWABLE_MODE == True:
             next_node = mcts.root
             print('===============================')
 
-
-
     def _draw_circle(self, x, y, r, **kwargs):
         return self.create_oval(x-r, y-r, x+r, y+r, **kwargs)
     tk.Canvas.draw_circle = _draw_circle
@@ -264,16 +262,15 @@ if DRAWABLE_MODE == True:
     mcts_tk = tk.Tk()
     mcts_tk.resizable(width=False, height=False)
     mcts_tk.bind('<ButtonRelease-1>', _mouse_left_up)
-    mcts_canvas = tk.Canvas(mcts_tk, \
-                            width=MCTS_WINDOW_WIDTH, \
-                            height=MCTS_WINDOW_HEIGHT, \
-                            borderwidth=0, \
-                            highlightthickness=0, \
+    mcts_canvas = tk.Canvas(mcts_tk,
+                            width=MCTS_WINDOW_WIDTH,
+                            height=MCTS_WINDOW_HEIGHT,
+                            borderwidth=0,
+                            highlightthickness=0,
                             bg="black")
     mcts_canvas.grid()
 
     mcts.draw()
-
 
     mcts_tk.wm_title("AlphaGomoku - MCTS")
     mcts_tk.mainloop()
@@ -314,8 +311,7 @@ else:
             node = mcts.play(node, TEMPERATURE)
             
             next_state = node.state
-            next_board = next_state.board
-            
+            next_board = next_state.board 
             r = next_board.last_row
             c = next_board.last_col
 
@@ -329,8 +325,8 @@ else:
                     pi[idx] = n_list[n]
                 pi_list.append(pi)
                 nst = int(next_state.turn + 1)
-                for _ in range(nst):
-                    if _ %2*2-1 == next_state.turn%2*2-1:
+                for i in range(nst):
+                    if i %2*2-1 == next_state.turn%2*2-1:
                     	z_list.append([1])
                     else:
                         z_list.append([-1])
@@ -346,7 +342,7 @@ else:
                     pi[idx] = n_list[n]
                 pi_list.append(pi)
             
-                nst = int(next_state.turn + 1)
+                nst = next_state.turn + 1
                 for _ in range(nst):
                     z_list.append([-1])
                     t_list.append([float(next_state.turn)])
@@ -355,10 +351,10 @@ else:
         if iteration % SELF_PLAY_ITER == 0:
             l = len(input_list) - 9
             index = []
-            i = random.randrange(0, max(1, len(input_list)//200))
+            i = random.randrange(0, max(1, len(input_list)//SELF_PLAY_BATCH_SIZE))
             while i < l:
                 index.append(i)
-                i += random.randrange(1, max(2, len(input_list)//200))
+                i += random.randrange(1, max(2, len(input_list)//SELF_PLAY_BATCH_SIZE))
             while i < len(input_list):
                 index.append(i)
                 i += 1
@@ -417,10 +413,10 @@ else:
         print('============ iter:' + str(iteration) + '=============')
         l = len(input_list) - 9
         index = []
-        i = random.randrange(0, max(1, len(input_list)//1000))
+        i = random.randrange(0, max(1, len(input_list)//TRAIN_BATCH_SIZE))
         while i < l:
             index.append(i)
-            i += random.randrange(1, max(2, len(input_list)//1000))
+            i += random.randrange(1, max(2, len(input_list)//TRAIN_BATCH_SIZE))
         while i < len(input_list):
             index.append(i)
             i += 1
