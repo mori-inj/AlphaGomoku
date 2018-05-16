@@ -5,9 +5,9 @@ import random
 import math
 
 
-DRAWABLE_MODE = True
+DRAWABLE_MODE = False#True
 BS = BOARD_SIZE
-MCTS_SEARCH_NUM = 1600
+MCTS_SEARCH_NUM = 64
 SELF_PLAY_NUM = 5000 #25000
 SELF_PLAY_ITER = 50
 TRAIN_ITER = 1000
@@ -68,6 +68,25 @@ def preproc_board(board, turn):
     s = np.transpose(s, [0, 2, 3, 1])
     return s
 
+def dihedral_reflection(i, x):
+    if i > 0:
+        if i > 4:
+            x = np.fliplr(x)
+            i -= 4
+        for _ in range(i):
+            x = np.rot90(x)
+    elif i < 0:
+        ii = -i
+        if ii > 4:
+            ii -= 4
+        for _ in range(4 - ii):
+            x = np.rot90(x)
+
+        if i < -4:
+            x = np.fliplr(x)
+    return x
+
+
 
 class Node:
     def __init__(self, state, parent=None):
@@ -84,7 +103,7 @@ class Node:
     def search(self):
         max_child = self.select()
         if max_child == self:
-            max_child.expand(get_next_board_state)
+            max_child.expand(get_next_board_state) # FIXME Gomoku specific
         else:
             self.selected_child = max_child
             max_child.search()
@@ -109,7 +128,7 @@ class Node:
         return max_child
 
     def expand(self, get_next_states):
-        if is_game_ended(self.state.board):
+        if is_game_ended(self.state.board): # FIXME Gomoku specific
             _,v = self.evaluate(self.state, [])
             if self.parent != None:
                 self.parent.backup(v, self)
@@ -127,32 +146,14 @@ class Node:
         if self.parent != None:
             self.parent.backup(v, self)
 
-    def dihedral_reflection(self, i, x):
-        if i > 0:
-            if i > 4:
-                x = np.fliplr(x)
-                i -= 4
-            for _ in range(i):
-                x = np.rot90(x)
-        elif i < 0:
-            ii = -i
-            if ii > 4:
-                ii -= 4
-            for _ in range(4 - ii):
-                x = np.rot90(x)
-
-            if i < -4:
-                x = np.fliplr(x)
-        return x
-
-    def evaluate(self, state, state_list):
+    def evaluate(self, state, state_list): # FIXME Gomoku specific
         i = random.randrange(1, 9)
-        board = self.dihedral_reflection(i, np.asarray(state.board))
+        board = dihedral_reflection(i, np.asarray(state.board))
         turn = state.turn
         s = preproc_board(board, turn)
         p,v = network.get_output(s)
         p = np.reshape(p, (BS, BS))
-        p = self.dihedral_reflection(-i, p)
+        p = dihedral_reflection(-i, p)
         p_dict = {}
         for new_state in state_list:
             r = new_state.last_row
@@ -191,6 +192,7 @@ class Node:
         for i in range(len(N_list)):
             if N_list[i][0] >= r:
                 return N_list[i][1]
+        
         print(len(self.N))
         print(len(N_list))
         print(len(pi))
@@ -210,7 +212,7 @@ class Node:
 
 class MCTS:
     def __init__(self, board_size):
-        self.board_size = board_size
+        self.board_size = board_size # FIXME Gomoku specific
         self.root = Node(BoardState(board_size, 0))
 
     def search(self, node=None):
