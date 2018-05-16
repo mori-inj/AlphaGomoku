@@ -3,11 +3,12 @@ from Gomoku import *
 import copy
 import tkinter as tk
 import random
+import math
 
 
-DRAWABLE_MODE = True
+DRAWABLE_MODE = False#True
 BS = BOARD_SIZE
-MCTS_SEARCH_NUM = 256 #1600
+MCTS_SEARCH_NUM = 64 #1600
 SELF_PLAY_NUM = 5000 #25000
 SELF_PLAY_ITER = 50
 TRAIN_ITER = 1000
@@ -16,7 +17,7 @@ TEMPER_EPS = 1e-2
 SELF_PLAY_BATCH_SIZE = 200
 TRAIN_BATCH_SIZE = 1000
 TEMPERATURE = TEMPER_EPS
-network = Network(board_size = BS, input_frame_num = 3, residual_num = 9, is_trainable=True)#not DRAWABLE_MODE)
+network = Network(board_size = BS, input_frame_num = 3, residual_num = 9, is_trainable=not DRAWABLE_MODE)
 
 # input_frame_num = 5 means, past 2 mover per each player + 1
 
@@ -100,7 +101,7 @@ class Node:
 
         Q_U_dict = {}
         for child in self.child_list:
-            U = 5 * self.P[child] * N_sum**0.5 / (1 + self.N[child])
+            U = 5 * self.P[child] * math.sqrt(N_sum) / (1 + self.N[child])
             Q_U_dict[child] = self.Q[child] + U
         
         return max(Q_U_dict, key=Q_U_dict.get)
