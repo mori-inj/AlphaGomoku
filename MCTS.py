@@ -98,6 +98,7 @@ class Node:
         self.Q = {}
         self.W = {}
         self.P = {}
+        self.U = {}
         self.selected_child = None
     
     def search(self):
@@ -120,6 +121,7 @@ class Node:
         const = C_PUCT * math.sqrt(N_sum)
         for child in self.child_list:
             U = self.P[child] * const / (1 + self.N[child])
+            self.U[child] = U
             QU = self.Q[child] + U
             if QU_max < QU:
                 QU_max = QU
@@ -143,6 +145,7 @@ class Node:
             self.Q[new_node] = 0
             self.W[new_node] = 0
             self.P[new_node] = p[state]
+            self.U[new_node] = 0
         if self.parent != None:
             self.parent.backup(v, self)
 
@@ -207,7 +210,7 @@ class Node:
         s -= (len(self.child_list) * (bs+p)) / 2
         i = 0
         for child in self.child_list:
-            child.draw(x + bs + p, s + (bs+p) * i, child==self.selected_child)
+            child.draw(x + bs + p + 20, s + (bs+p) * i, child==self.selected_child)
             i += 1
 
 class MCTS:

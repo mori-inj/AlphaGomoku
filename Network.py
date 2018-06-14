@@ -77,7 +77,7 @@ class Network:
             #self.policy_loss = tf.reduce_mean(tf.nn.sigmoid_cross_entropy_with_logits(labels=self.pi, logits=self.P))
             self.loss = self.value_loss + self.policy_loss + theta
             
-            learning_rate = 0.003 #0.01 # TODO apply learning step anneling
+            learning_rate = 0.001 #0.01 # TODO apply learning step anneling
             optimizer = tf.train.MomentumOptimizer(learning_rate, 0.9)
             self.train_model = optimizer.minimize(self.loss)
             self.init = tf.global_variables_initializer()

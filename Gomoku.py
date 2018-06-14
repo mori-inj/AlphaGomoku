@@ -43,8 +43,8 @@ def draw_board(canvas, sx, sy, board, node=None, parent=None, selected=None):
         txt = ""
         txt += "N:%.0f\n" % parent.N[node]
         txt += "W:%.2f\n" % parent.W[node]
-        txt += "Q:%.2f\n" % parent.Q[node]
         txt += "P:%.2f\n" % parent.P[node]
+        txt += "Q+U:%.2f+%.2f=%.2f\n" % (parent.Q[node], parent.U[node], (parent.U[node] + parent.Q[node]) ) # for debug
         ci = canvas.create_text(sx, sy+bs, anchor="nw", fill="#FFF", font=("Purisa", 10), text=txt)
 
 
