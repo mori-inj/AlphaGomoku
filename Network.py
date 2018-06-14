@@ -26,7 +26,7 @@ def PolicyOutputBlock(x, board_size, output_size):
         #x = tf.reshape(x, [-1, 256 * board_size**2])
         x = tf.layers.flatten(x)
         x = tf.layers.dense(x, output_size, name='fc')
-        x = tf.nn.sigmoid(x)
+        x = tf.divide(x, tf.maximum(tf.norm(x, ord=1), 1e-7))
         return x
 
 def ValueOutputBlock(x, board_size):
@@ -74,9 +74,10 @@ class Network:
             self.value_loss = tf.reduce_mean((self.Z - self.V)**2)
             self.policy_loss = tf.reduce_mean( - tf.pow(self.pi, self.T) * tf.log(tf.maximum(self.P,1e-7)))
             #self.policy_loss = tf.reduce_mean(tf.nn.sigmoid_cross_entropy_with_logits(labels=tf.pow(self.pi, self.T), logits=self.P))
+            #self.policy_loss = tf.reduce_mean(tf.nn.sigmoid_cross_entropy_with_logits(labels=self.pi, logits=self.P))
             self.loss = self.value_loss + self.policy_loss + theta
             
-            learning_rate = 0.001 #0.01 # TODO apply learning step anneling
+            learning_rate = 0.003 #0.01 # TODO apply learning step anneling
             optimizer = tf.train.MomentumOptimizer(learning_rate, 0.9)
             self.train_model = optimizer.minimize(self.loss)
             self.init = tf.global_variables_initializer()

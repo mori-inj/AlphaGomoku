@@ -105,7 +105,7 @@ class Node:
         if max_child == self:
             max_child.expand(get_next_board_state) # FIXME Gomoku specific
         else:
-            self.selected_child = max_child
+            #self.selected_child = max_child
             max_child.search()
 
     def select(self):
@@ -193,16 +193,16 @@ class Node:
             if N_list[i][0] >= r:
                 return N_list[i][1]
         
-        print(len(self.N))
-        print(len(N_list))
-        print(len(pi))
+        print('Exception on \'play\' line:196 ', len(self.N))
+        print('Exception on \'play\' line:197 ', len(N_list))
+        print('Exception on \'play\' line:198 ', len(pi))
         return N_list[-1][1]
     
     def draw(self,x,y,flag):
         draw_board(mcts_canvas, x, y, self.state, self, self.parent, flag)
         if flag == False:
             return
-        p = 60
+        p = 65
         s = MCTS_WINDOW_HEIGHT/2
         s -= (len(self.child_list) * (bs+p)) / 2
         i = 0
@@ -350,7 +350,7 @@ else:
             
                 nst = next_state.turn + 1
                 for _ in range(nst):
-                    z_list.append([-1])
+                    z_list.append([0])
                     t_list.append([float(next_state.turn)])
                 break
 
@@ -365,7 +365,7 @@ else:
                 index.append(i)
                 i += 1
             random.shuffle(index)
-            print(len(index))
+            print('data size: ', len(index))
             input_ = np.asarray([input_list[idx] for idx in index])
             pi_ = np.asarray([pi_list[idx] for idx in index])
             z_ = np.asarray([z_list[idx] for idx in index])
