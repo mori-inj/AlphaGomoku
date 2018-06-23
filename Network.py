@@ -26,7 +26,8 @@ def PolicyOutputBlock(x, board_size, output_size):
         #x = tf.reshape(x, [-1, 256 * board_size**2])
         x = tf.layers.flatten(x)
         x = tf.layers.dense(x, output_size, name='fc')
-        x = tf.divide(x, tf.maximum(tf.norm(x, ord=1), 1e-7))
+        x = tf.nn.softmax(x)
+        #x = tf.divide(x, tf.maximum(tf.norm(x, ord=1), 1e-7))
         return x
 
 def ValueOutputBlock(x, board_size):

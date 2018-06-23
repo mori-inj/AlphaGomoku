@@ -7,11 +7,12 @@ import math
 
 DRAWABLE_MODE = False#True
 BS = BOARD_SIZE
-MCTS_SEARCH_NUM = 64
-SELF_PLAY_NUM = 5000 #25000
-SELF_PLAY_ITER = 50
-TRAIN_ITER = 1000
-PRINT_ITER = 200
+MCTS_SEARCH_NUM = 128
+SELF_PLAY_NUM = 2000 #25000
+AFTER_NUM = 100
+SELF_PLAY_ITER = 10
+TRAIN_ITER = 500
+PRINT_ITER = 100
 TEMPER_EPS = 1e-2
 SELF_PLAY_BATCH_SIZE = 200
 TRAIN_BATCH_SIZE = 1000
@@ -418,7 +419,7 @@ else:
         if iteration % SELF_PLAY_ITER == 0:
             network.train(input_, pi_, z_, t_, TRAIN_ITER, PRINT_ITER) 
 
-    for iteration in range(SELF_PLAY_NUM):
+    for iteration in range(AFTER_NUM):
         print('============ iter:' + str(iteration) + '=============')
         l = len(input_list) - 9
         index = []
