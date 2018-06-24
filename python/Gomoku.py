@@ -142,6 +142,6 @@ class Gomoku:
 
     def reset(self):
         self.turn = 0
-        self.board = np.zeros([self.BOARD_SIZE, self.BOARD_SIZE]).tolist()
+        self.board = BoardState(board_size, 0)
 
 
