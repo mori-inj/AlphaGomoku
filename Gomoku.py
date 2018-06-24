@@ -104,10 +104,17 @@ class BoardState:
         return self.board[key]
 	
     def __str__(self):
-        s = '['
+        s = ''
         for i in range(self.board_size):
-            s += self.board[i].__str__()
-        return s + ']'
+            for j in range(self.board_size):
+                if self.board[i][j]==0:
+                    s += "| "
+                elif self.board[i][j]%2*2-1 == 1:
+                    s += "|x"
+                else:
+                    s += "|o"
+            s += '|\n'
+        return s
 
 
 class Gomoku:

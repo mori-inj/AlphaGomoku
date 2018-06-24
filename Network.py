@@ -23,19 +23,15 @@ def PolicyOutputBlock(x, board_size, output_size):
         x = tf.layers.conv2d(x, 2, 1, strides=1, padding='same', name='conv')
         x = tf.layers.batch_normalization(x)
         x = tf.nn.relu(x)
-        #x = tf.reshape(x, [-1, 256 * board_size**2])
         x = tf.layers.flatten(x)
         x = tf.layers.dense(x, output_size, name='fc')
         x = tf.nn.softmax(x)
-        #x = tf.divide(x, tf.maximum(tf.norm(x, ord=1), 1e-7))
         return x
 
 def ValueOutputBlock(x, board_size):
     with tf.variable_scope('value_output'):
         x = tf.layers.conv2d(x, 1, 1, strides=1, padding='same', name='conv')
         
-        #x = tf.reshape(x, [-1, board_size**2])
-        #x = tf.reshape(x, [-1, 1, 1, board_size**2])
         x = tf.layers.flatten(x)
         x = tf.layers.batch_normalization(x)
         
@@ -87,31 +83,25 @@ class Network:
 
 
         self.sess = tf.Session(graph = self.g)
+        self.is_trainable = is_trainable
         if is_trainable == True:
             self.sess.run(self.init)
         else:
             self.saver.restore(self.sess,"./AlphaGomoku.ckpt")
 
     def train(self, X_, pi_, Z_, T_, it, prt_it):
-        for i in range(it): # TODO should change # of iteration steps
-            fd = {self.X: X_, self.pi: pi_, self.Z: Z_, self.T: T_}
-            self.sess.run(self.train_model, feed_dict=fd)
-            if i % prt_it == 0:
-                print('======= ' + str(i) + ' =======')
-                l, pl, vl = self.sess.run([self.loss, self.policy_loss, self.value_loss], feed_dict=fd)
-                print('loss: ' , l)
-                print('policy loss: ', pl)
-                print('value loss: ', vl)
-                save_path = self.saver.save(self.sess,"./AlphaGomoku.ckpt")
+        if self.is_trainable:
+            for i in range(it): # TODO should change # of iteration steps
+                fd = {self.X: X_, self.pi: pi_, self.Z: Z_, self.T: T_}
+                self.sess.run(self.train_model, feed_dict=fd)
+                if i % prt_it == 0:
+                    print('======= ' + str(i) + ' =======')
+                    l, pl, vl = self.sess.run([self.loss, self.policy_loss, self.value_loss], feed_dict=fd)
+                    print('loss: ' , l)
+                    print('policy loss: ', pl)
+                    print('value loss: ', vl)
+                    save_path = self.saver.save(self.sess,"./AlphaGomoku.ckpt")
 
     def get_output(self, X_):
         return self.sess.run([self.P, self.V], feed_dict={self.X: X_})
-        
-"""
-PVN = PolicyValueNetwork(3,2,10)
-A = np.random.rand(18).reshape(1,3,3,2)
-B = np.random.rand(9).reshape(1,9)
-B = np.absolute(B)
-C = np.random.rand(1).reshape(1,1)
-PVN.train(A,B,C)
-"""
+
