@@ -1,7 +1,7 @@
 from Gomoku import *
 from MCTS import *
 
-MCTS_SEARCH_NUM = 512
+MCTS_SEARCH_NUM = 128
 
 TEMPER_EPS = 1e-2
 TEMPERATURE = TEMPER_EPS

@@ -8,6 +8,8 @@ BS = BOARD_SIZE
 SELF_PLAY_BATCH_SIZE = 200
 TRAIN_BATCH_SIZE = 1000
 C_PUCT = 5
+EPSILON = 0.25
+DIR_ALPHA = 0.5
 
 
 heuristic = HeuristicAgent()
@@ -118,7 +120,7 @@ class Node:
         else:
             #self.selected_child = max_child
             max_child.search()
-
+    
     def select(self):
         max_Q_U = -1
         max_child = self
@@ -130,7 +132,12 @@ class Node:
         QU_max = -float('Inf')
         const = C_PUCT * math.sqrt(N_sum)
         for child in self.child_list:
-            U = self.P[child] * const / (1 + self.N[child])
+            if self.parent == None: # node is root
+                noise = np.random.dirichlet([DIR_ALPHA]) 
+                P = (1-EPSILON)*self.P[child] + EPSILON*noise
+            else:
+                P = self.P[child]
+            U = P * const / (1 + self.N[child])
             self.U[child] = U
             QU = self.Q[child] + U
             if QU_max < QU:

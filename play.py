@@ -40,7 +40,9 @@ x_count = 0
 o_count = 0
 draw_count = 0
 
-for i in range(100):
+for i in range(1000):
+    if i % 100 == 0:
+        print(i)
     gomoku = Gomoku(BOARD_SIZE, N_IN_A_ROW)
     turn = 0
     board_state = gomoku.board

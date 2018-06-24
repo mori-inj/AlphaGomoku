@@ -122,8 +122,12 @@ class HeuristicAgent:
                         idx += 1
                         if pos_score[i][j] > -neg_score[i][j]:
                             cnt_advtg += 1
-                        
-        v = cnt_advtg / idx if idx != 0 else 1
+        if idx != 0:                
+            v = (cnt_advtg / idx)*2-1
+        elif is_game_ended(board_state.board):
+            v = 1
+        else:
+            v = 0
         p_dict = {}
         for new_state in state_list:
             r = new_state.last_row
