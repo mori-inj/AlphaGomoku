@@ -1,7 +1,7 @@
-#include "gomoku.h"
+#include "play.h"
 
 int main()
 {
-	Gomoku g(3, 3);
+	play();
 	return 0;
 }

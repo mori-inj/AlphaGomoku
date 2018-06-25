@@ -19,6 +19,18 @@ class BoardState
 		BoardState(int bs, int t);
 		BoardState(int bs, int t, int lr, int lc);
 		vector<int>& operator[] (const int index);
+		inline bool operator< (const BoardState& that) const
+		{
+			for(int i=0; i<board_size; i++) {
+				for(int j=0; j<board_size; j++) {
+					if(board[i][j] < that.board[i][j])
+						return true;
+					else if(board[i][j] > that.board[i][j])
+						return false;
+				}
+			}
+			return false;
+		};
 		void print();
 };
 
