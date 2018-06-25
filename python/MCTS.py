@@ -5,8 +5,6 @@ import random
 import math
 
 BS = BOARD_SIZE
-SELF_PLAY_BATCH_SIZE = 200
-TRAIN_BATCH_SIZE = 1000
 C_PUCT = 5
 EPSILON = 0.25
 DIR_ALPHA = 0.5
@@ -122,7 +120,6 @@ class Node:
             max_child.search()
     
     def select(self):
-        max_Q_U = -1
         max_child = self
         N_sum = self.N_sum
         
@@ -131,10 +128,12 @@ class Node:
 
         QU_max = -float('Inf')
         const = C_PUCT * math.sqrt(N_sum)
+        noise = np.random.dirichlet([DIR_ALPHA] * len(self.child_list))
+        idx = 0
         for child in self.child_list:
             if self.parent == None: # node is root
-                noise = np.random.dirichlet([DIR_ALPHA]) 
-                P = (1-EPSILON)*self.P[child] + EPSILON*noise
+                P = (1-EPSILON)*self.P[child] + EPSILON*noise[idx]
+                idx += 1
             else:
                 P = self.P[child]
             U = P * const / (1 + self.N[child])
