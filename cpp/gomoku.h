@@ -8,16 +8,21 @@ using namespace std;
 const int BOARD_SIZE = 3;
 const int N_IN_A_ROW = 3;
 
+typedef vector<vector<int> > Board;
+
+bool is_game_ended(Board& board);
+
 class BoardState
 {
 	public:
+		BoardState() {};
+		BoardState(int bs, int t);
+		BoardState(int bs, int t, int lr, int lc);
 		int board_size;
-		vector<vector<int> > board;
+		Board board;
 		int turn;
 		int last_row;
 		int last_col;
-		BoardState(int bs, int t);
-		BoardState(int bs, int t, int lr, int lc);
 		vector<int>& operator[] (const int index);
 		inline bool operator< (const BoardState& that) const
 		{
@@ -37,17 +42,15 @@ class BoardState
 class Gomoku
 {
 	public:
+		Gomoku(int bs, int nir);
 		int turn;
 		int BOARD_SIZE;
 		int N_IN_A_ROW;
 		BoardState board;
-		Gomoku(int bs, int nir);
 		bool is_game_ended();
 		bool is_valid_input(int row, int col);
 		void put_stone(int row, int col);
 		void reset();
 };
-
-bool is_game_ended(vector<vector<int> >& board);
 
 #endif

@@ -1,4 +1,5 @@
 #include "gomoku.h"
+
 #include <stdio.h>
 
 BoardState::BoardState(int bs, int t)
@@ -82,7 +83,7 @@ void Gomoku::reset()
 
 
 
-bool is_game_ended(vector<vector<int> >& board)
+bool is_game_ended(Board& board)
 {
 	int turn = -1;
 	int row = -1, col = -1;
@@ -122,8 +123,9 @@ bool is_game_ended(vector<vector<int> >& board)
 				ny += dy[key];
 				nx += dx[key];
 			}
-			if(j == N_IN_A_ROW)
+			if(j == N_IN_A_ROW) {
 				return true;
+			}
 		}
 	}
 	return false;			

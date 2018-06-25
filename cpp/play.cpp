@@ -1,5 +1,10 @@
 #include "play.h"
 
+#include "gomoku.h"
+#include "random_agent.h"
+#include "heuristic_agent.h"
+#include "mcts_agent.h"
+
 #include <stdlib.h>
 #include <time.h>
 
@@ -8,8 +13,11 @@ void play()
 	srand((unsigned)time(NULL));
 
 	RandomAgent AgentA;
+	//RandomAgent AgentB;
 	//HeuristicAgent AgentA;
-	HeuristicAgent AgentB;
+	//HeuristicAgent AgentB;
+	//MCTSAgent AgentA;
+	MCTSAgent AgentB;
 	
 	/*
 	bool draw_flag = true;
@@ -49,7 +57,7 @@ void play()
 	int o_count = 0;
 	int draw_count = 0;
 
-	for(int i=0; i<10000; i++) {
+	for(int i=0; i<1000; i++) {
 		if(i%100==0) printf("%d\n",i);
 		Gomoku gomoku(BOARD_SIZE, N_IN_A_ROW);
 		int turn = 0;
