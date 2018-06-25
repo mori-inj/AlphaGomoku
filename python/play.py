@@ -6,9 +6,9 @@ from MCTSAgent import MCTSAgent as MCTSAg
 AgentA = RandomAg()
 #AgentB = RandomAg()
 #AgentA = HeuristicAg()
-#AgentB = HeuristicAg()
+AgentB = HeuristicAg()
 #AgentA = MCTSAg()
-AgentB = MCTSAg()
+#AgentB = MCTSAg()
 
 """
 gomoku = Gomoku(BOARD_SIZE, N_IN_A_ROW)

@@ -5,8 +5,6 @@ import numpy as np
 dx = [1, 1, 0, -1, -1, -1, 0, 1]
 dy = [0, -1, -1, -1, 0, 1, 1, 1]
 
-old_board = 0
-
 class HeuristicAgent:
     def __init__(self):
         pass
