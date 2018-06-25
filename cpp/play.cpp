@@ -1,8 +1,14 @@
 #include "play.h"
 
+#include <stdlib.h>
+#include <time.h>
+
 void play()
 {
-	HeuristicAgent AgentA;
+	srand((unsigned)time(NULL));
+
+	RandomAgent AgentA;
+	//HeuristicAgent AgentA;
 	HeuristicAgent AgentB;
 	
 	/*
@@ -69,7 +75,7 @@ void play()
 			}
 		}
 		if(draw_flag) {
-			draw_count ++;
+			draw_count++;
 		}
 	}
 	printf("%d %d %d\n\n",x_count, o_count, draw_count);

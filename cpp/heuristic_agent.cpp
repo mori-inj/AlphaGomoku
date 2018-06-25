@@ -1,7 +1,6 @@
 #include "heuristic_agent.h"
 
 #include <stdlib.h>
-#include <time.h>
 #include <limits.h>
 #include <vector>
 #include <algorithm>
@@ -11,12 +10,10 @@ using namespace std;
 const int dx[8] = {1, 1, 0, -1, -1, -1, 0, 1};
 const int dy[8] = {0, -1, -1, -1, 0, 1, 1, 1};
 
-pair<map<BoardState, double>, double> HeuristicAgent::evalutate(BoardState& board_state, vector<BoardState>& state_list)
+pair<map<BoardState, double>, double> HeuristicAgent::evaluate(BoardState& board_state, vector<BoardState>& state_list)
 {
 	int idx = 0;
 	int cnt_advtg = 0;
-
-	srand((unsigned)time(NULL));
 
 	int turn = board_state.turn + 1;
 	vector<vector<int> > pos_score(BOARD_SIZE, vector<int>(BOARD_SIZE, 0));
@@ -195,8 +192,6 @@ BoardState HeuristicAgent::play(BoardState board_state)
 {
 	int idx = 0;
 	int final_row, final_col;
-
-	srand((unsigned)time(NULL));
 
 	int turn = board_state.turn + 1;
 	vector<vector<int> > pos_score(BOARD_SIZE, vector<int>(BOARD_SIZE, 0));
