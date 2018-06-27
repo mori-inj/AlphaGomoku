@@ -12,12 +12,12 @@ void play()
 {
 	srand((unsigned)time(NULL));
 
-	RandomAgent AgentA;
-	//RandomAgent AgentB;
+	//RandomAgent AgentA;
+	RandomAgent AgentB;
 	//HeuristicAgent AgentA;
 	//HeuristicAgent AgentB;
-	//MCTSAgent AgentA;
-	MCTSAgent AgentB;
+	MCTSAgent AgentA;
+	//MCTSAgent AgentB;
 	
 	/*
 	bool draw_flag = true;
@@ -57,8 +57,8 @@ void play()
 	int o_count = 0;
 	int draw_count = 0;
 
-	for(int i=0; i<1000; i++) {
-		if(i%100==0) printf("%d\n",i);
+	for(int i=0; i<100; i++) {
+		if(i%10==0) printf("%d\n",i);
 		Gomoku gomoku(BOARD_SIZE, N_IN_A_ROW);
 		int turn = 0;
 		bool draw_flag = true;

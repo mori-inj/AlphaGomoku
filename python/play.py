@@ -3,12 +3,12 @@ from RandomAgent import RandomAgent as RandomAg
 from HeuristicAgent import HeuristicAgent as HeuristicAg
 from MCTSAgent import MCTSAgent as MCTSAg
 
-AgentA = RandomAg()
+#AgentA = RandomAg()
 #AgentB = RandomAg()
-#AgentA = HeuristicAg()
-AgentB = HeuristicAg()
+AgentA = HeuristicAg()
+#AgentB = HeuristicAg()
 #AgentA = MCTSAg()
-#AgentB = MCTSAg()
+AgentB = MCTSAg()
 
 """
 gomoku = Gomoku(BOARD_SIZE, N_IN_A_ROW)
@@ -40,7 +40,7 @@ x_count = 0
 o_count = 0
 draw_count = 0
 
-for i in range(1000):
+for i in range(10000):
     if i % 100 == 0:
         print(i)
     gomoku = Gomoku(BOARD_SIZE, N_IN_A_ROW)

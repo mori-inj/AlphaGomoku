@@ -3,7 +3,7 @@
 
 #include "gomoku.h"
 
-const int MCTS_SEARCH_NUM = 128;//256;
+const int MCTS_SEARCH_NUM = 32;//256;
 const double TEMPER_EPS = 2e-1;
 const double TEMPERATURE = TEMPER_EPS;
 
