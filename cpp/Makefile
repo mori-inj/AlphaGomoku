@@ -18,6 +18,7 @@ play.o: play.h play.cpp
 
 run: main main.cpp
 	./main
+	rm main
 
 clean:
 	rm main

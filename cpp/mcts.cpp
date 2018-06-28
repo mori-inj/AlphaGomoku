@@ -150,16 +150,16 @@ Node* Node::select()
 	vector<double> noise = Dirichlet(DIR_ALPHA, (int)child_list.size());
 	int idx = 0;
 	for(auto& child : child_list) {
-		NQWPU_type& nqwpu = NQWPU[child];
+		//NQWPU_type& nqwpu = NQWPU[child];
 
 		if(parent == NULL) {
-			p = (1-EPSILON)*P(nqwpu) + EPSILON*noise[idx++];
+			p = (1-EPSILON)*(child->P) + EPSILON*noise[idx++];
 		} else {
-			p = P(nqwpu);
+			p = (child->P);
 		}
-		u = p * constant / (1 + N(nqwpu));
-		U(nqwpu) = u;
-		double QU = Q(nqwpu) + u;
+		u = p * constant / (1 + (child->N));
+		child->U = u;
+		double QU = child->Q + u;
 		if(QU_max < QU) {
 			QU_max = QU;
 			max_child = child;
@@ -186,7 +186,12 @@ void Node::expand()
 	for(auto& state : state_list) {
 		Node* new_node = new Node(state, evaluate, this);
 		child_list.push_back(new_node);
-		NQWPU[new_node] = make_tuple(0, 0, 0, p[state], 0);
+		//NQWPU[new_node] = make_tuple(0, 0, 0, p[state], 0);
+		new_node->N = 0;
+		new_node->Q = 0;
+		new_node->W = 0;
+		new_node->P = p[state];
+		new_node->U = 0;
 		/*
 		N[new_node] = 0;
 		Q[new_node] = 0;
@@ -202,12 +207,12 @@ void Node::expand()
 
 void Node::backup(double v, Node* child)
 {
-	NQWPU_type& nqwpu = NQWPU[child];
+	//NQWPU_type& nqwpu = NQWPU[child];
 
-	N(nqwpu) += 1;
+	child->N += 1;
 	N_sum++;
-	W(nqwpu) += v;
-	Q(nqwpu) = W(nqwpu) / N(nqwpu);
+	child->W += v;
+	child->Q = child->W / child->N;
 	if(parent != NULL) {
 		parent->backup(v, this);
 	}
@@ -218,7 +223,7 @@ pair<map<Node*, long double>, long double> Node::get_pi(double t)
 	map<Node*, long double> pi;
 	long double N_s = 1e-9;
 	for(auto& n : child_list) {
-		pi[n] = powl((long double)N(n), (long double)1.0/t);
+		pi[n] = powl((long double)n->N, (long double)1.0/t);
 		N_s += pi[n];
 	}
 
@@ -248,7 +253,7 @@ Node* Node::play(double t)
 		}
 	}
 
-	printf("Exception on \'play\' %d\n", (int)NQWPU.size());
+	printf("Exception on \'play\' %d\n", (int)child_list.size());
 	printf("Exception on \'play\' %d\n", (int)N_list.size());
 	printf("Exception on \'play\' %d\n", (int)pi.size());
 

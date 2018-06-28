@@ -38,6 +38,14 @@ class Node
 		BoardState state;
 		vector<Node*> child_list;
 		int N_sum;
+		
+		int N;
+		double Q;
+		double W;
+		double P;
+		double U;
+
+		/*
 		map<Node*, tuple<int, double, double, double, double> > NQWPU;
 		int& N(Node* child) { return get<0>(NQWPU[child]); }
 		double& Q(Node* child) { return get<1>(NQWPU[child]); }
@@ -50,6 +58,7 @@ class Node
 		double& W(NQWPU_type& nqwpu) { return get<2>(nqwpu); }
 		double& P(NQWPU_type& nqwpu) { return get<3>(nqwpu); }
 		double& U(NQWPU_type& nqwpu) { return get<4>(nqwpu); }
+		*/
 
 		/*
 		map<Node*, int> N;

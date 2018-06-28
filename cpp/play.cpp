@@ -13,10 +13,10 @@ void play()
 	srand((unsigned)time(NULL));
 
 	//RandomAgent AgentA;
-	RandomAgent AgentB;
-	//HeuristicAgent AgentA;
-	//HeuristicAgent AgentB;
-	MCTSAgent AgentA;
+	//RandomAgent AgentB;
+	HeuristicAgent AgentA;
+	HeuristicAgent AgentB;
+	//MCTSAgent AgentA;
 	//MCTSAgent AgentB;
 	
 	/*
