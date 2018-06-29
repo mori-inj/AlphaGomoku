@@ -1,6 +1,6 @@
 CC = g++
-CFLAGS = -std=c++11
-CXXFLAGS = -std=c++11
+CFLAGS = -O3 -std=c++11
+CXXFLAGS = -O3 -std=c++11
 
 all: main
 

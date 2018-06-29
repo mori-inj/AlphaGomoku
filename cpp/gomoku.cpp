@@ -130,3 +130,16 @@ bool is_game_ended(Board& board)
 	}
 	return false;			
 }
+
+bool is_same_board(BoardState& a, BoardState& b)
+{
+	for(int i=0; i<BOARD_SIZE; i++) {
+		for(int j=0; j<BOARD_SIZE; j++) {
+			if(a[i][j] != b[i][j]) {
+				return false;
+			}
+		}
+	}
+	return true;
+}
+

@@ -39,6 +39,8 @@ class BoardState
 		void print();
 };
 
+bool is_same_board(BoardState& a, BoardState& b);
+
 class Gomoku
 {
 	public:

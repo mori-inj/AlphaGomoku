@@ -1,18 +1,31 @@
 #include "mcts_agent.h"
 
-#include "mcts.h"
+MCTSAgent::MCTSAgent() : mcts(BOARD_SIZE, evaluate_with_heuristic)
+{
+	mcts.root = NULL;
+}
 
 BoardState MCTSAgent::play(BoardState board_state)
 {
-	MCTS mcts(BOARD_SIZE, evaluate_with_heuristic);
-	mcts.root = new Node(board_state, evaluate_with_heuristic);
+	if(mcts.root == NULL) {
+		mcts.root = new Node(board_state, evaluate_with_heuristic);
+	} else {
+		Node* next_node = NULL;
+		for(auto& child : mcts.root->child_list) {
+			if(is_same_board(board_state, child->state)) {
+				next_node = child;
+				break;
+			}
+		}
+		mcts.root = next_node;
+	}
 	
 	for(int i=0; i<MCTS_SEARCH_NUM; i++) {
 		mcts.search(mcts.root);
 	}
 
-	Node* node = mcts.play(mcts.root, TEMPERATURE);
-	board_state = node->state;
+	mcts.root = mcts.play(mcts.root, TEMPERATURE);
+	board_state = mcts.root->state;
 
 	return board_state;
 }
