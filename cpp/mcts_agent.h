@@ -5,7 +5,7 @@
 
 #include "mcts.h"
 
-const int MCTS_SEARCH_NUM = 32;//256;
+const int MCTS_SEARCH_NUM = 128;//256;
 const double TEMPER_EPS = 2e-1;
 const double TEMPERATURE = TEMPER_EPS;
 
@@ -15,6 +15,7 @@ class MCTSAgent
 		MCTS mcts;
 		MCTSAgent();
 		BoardState play(BoardState board_state);
+		void clear();
 };
 
 #endif

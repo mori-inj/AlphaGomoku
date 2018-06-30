@@ -75,6 +75,8 @@ class Node
 		void backup(double v, Node* child);
 		pair<map<Node*, long double>, long double> get_pi(double t);
 		Node* play(double t);
+
+		void clear();
 };
 
 class MCTS

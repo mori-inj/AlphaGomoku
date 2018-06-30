@@ -260,6 +260,14 @@ Node* Node::play(double t)
 	return N_list[-1].second;
 }
 
+void Node::clear()
+{
+	for(auto& child : child_list) {
+		child->clear();
+	}
+	delete(this);
+}
+
 
 
 MCTS::MCTS(

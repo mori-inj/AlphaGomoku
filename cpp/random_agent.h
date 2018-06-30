@@ -8,6 +8,7 @@ class RandomAgent
 	public:
 		RandomAgent() {};
 		BoardState play(BoardState board_state);
+		void clear() {};
 };
 
 #endif

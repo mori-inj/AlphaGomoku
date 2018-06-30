@@ -10,7 +10,7 @@
 
 #define AA HeuristicAgent
 #define BB MCTSAgent
-#define ITER 1000
+#define ITER 100
 #define SELFPLAY true
 
 void play()
@@ -88,6 +88,9 @@ void play()
 			if(draw_flag) {
 				draw_count++;
 			}
+
+			AgentA.clear();
+			AgentB.clear();
 		}
 		printf("%d %d %d\n\n",x_count, o_count, draw_count);
 	}
