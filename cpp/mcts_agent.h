@@ -5,7 +5,7 @@
 
 #include "mcts.h"
 
-const int MCTS_SEARCH_NUM = 128;//256;
+const int MCTS_SEARCH_NUM = 150;
 const double TEMPER_EPS = 2e-1;
 const double TEMPERATURE = TEMPER_EPS;
 

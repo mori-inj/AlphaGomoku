@@ -10,7 +10,7 @@
 
 #define AA HeuristicAgent
 #define BB MCTSAgent
-#define ITER 100
+#define ITER 1000
 #define SELFPLAY true
 
 void play()
@@ -61,7 +61,6 @@ void play()
 			AA AgentA;
 			BB AgentB;
 
-			if(i%10==0) printf("%d\n",i);
 			Gomoku gomoku(BOARD_SIZE, N_IN_A_ROW);
 			int turn = 0;
 			bool draw_flag = true;
