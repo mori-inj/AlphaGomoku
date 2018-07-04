@@ -60,7 +60,7 @@ def preproc_board(board, turn):
     s = np.transpose(s, [0, 2, 3, 1])
     return s
 
-def dihedral_reflection(i, x):
+def dihedral_reflection_rotation(i, x):
     if i > 0:
         if i > 4:
             x = np.fliplr(x)
@@ -80,12 +80,12 @@ def dihedral_reflection(i, x):
 
 def evaluate_with_network(state, state_list):
     i = random.randrange(1, 9)
-    board = dihedral_reflection(i, np.asarray(state.board))
+    board = dihedral_reflection_rotation(i, np.asarray(state.board))
     turn = state.turn
     s = preproc_board(board, turn)
     p,v = network.get_output(s)
     p = np.reshape(p, (BS, BS))
-    p = dihedral_reflection(-i, p)
+    p = dihedral_reflection_rotation(-i, p)
     p_dict = {}
     for new_state in state_list:
         r = new_state.last_row

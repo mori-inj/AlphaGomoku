@@ -5,14 +5,15 @@ MCTS_SEARCH_NUM = 128
 
 TEMPER_EPS = 1e-2
 TEMPERATURE = TEMPER_EPS
+EVALUATE = evaluate_with_heuristic
 
 class MCTSAgent:
     def __init__(self):
         pass
 
     def play(self, board_state):
-        mcts = MCTS(BOARD_SIZE, evaluate_with_heuristic)
-        mcts.root = Node(board_state, evaluate_with_heuristic)
+        mcts = MCTS(BOARD_SIZE, EVALUATE)
+        mcts.root = Node(board_state, EVALUATE)
 
         for i in range(MCTS_SEARCH_NUM):
             mcts.search(mcts.root)
