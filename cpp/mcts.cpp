@@ -1,11 +1,16 @@
 #include "mcts.h"
 
+#include "network.h"
 #include "heuristic_agent.h"
 
 #include <math.h>
 #include <cfloat>
 #include <functional>
 #include <random>
+
+const bool IS_TRAINABLE = false;
+Network network;
+//input_frame_num = 5 means, past 2 moves per each player + 1
 
 HeuristicAgent heuristic;
 
@@ -29,19 +34,46 @@ vector<BoardState> get_next_states(BoardState& state)
 }
 
 
-/*vector<Board> preproc_board(Board& board, int turn)
+vector<Board> preproc_board(Board& board, int turn)
 {
-}
-*/
+	int frame = network.input_frame_num;
+	vector<Board> s(frame, vector<vector<int> > (BS, vector<int>(BS, 0)));
+	for(int fn=0; fn<(frame-1)/2; fn++) {
+		for(int i=0; i<BS; i++) {
+			for(int j=0; j<BS; j++) {
+				if(board[i][j] > 0 && board[i][j]%2 == turn%2 && board[i][j] <= turn - fn*2) {
+					s[fn][i][j] = 1;
+				}
+			}
+		}
+	}
+	for(int fn=0; fn<(frame-1)/2; fn++) {
+		for(int i=0; i<BS; i++) {
+			for(int j=0; j<BS; j++) {
+				if(board[i][j] > 0 && board[i][j]%2 != turn%2 && board[i][j] <= turn - fn*2) {
+					s[fn + (frame-1)/2][i][j] = 1;
+				}
+			}
+		}
+	}
 
-Board dihedral_reflection(int i, Board& x)
+	if(turn%2 == 0) {
+		s[frame-1] = vector<vector<int> > (BS, vector<int>(BS, 0));
+	} else {
+		s[frame-1] = vector<vector<int> > (BS, vector<int>(BS, 1));
+	}
+
+	return s;
+}
+
+Board dihedral_reflection_rotation(int i, Board x)
 {
 	function<Board(Board&)> fliplr = [](Board& x)->Board{
 		int bs = (int)x.size();
 		Board ret = vector<vector<int> > (bs, vector<int>(bs, 0));
-		for(int i=0; i<bs; i++) {
-			for(int j=0; j<bs; j++) {
-				ret[i][j] = x[i][bs-j-1];
+		for(int ii=0; ii<bs; ii++) {
+			for(int jj=0; jj<bs; jj++) {
+				ret[ii][jj] = x[ii][bs-jj-1];
 			}
 		}
 		return ret;
@@ -49,9 +81,9 @@ Board dihedral_reflection(int i, Board& x)
 	function<Board(Board&)> rot90 = [](Board& x)->Board{
 		int bs = (int)x.size();
 		Board ret = vector<vector<int> > (bs, vector<int>(bs, 0));
-		for(int i=0; i<bs; i++) {
-			for(int j=0; j<bs; j++) {
-				ret[i][j] = x[j][bs-i-1];
+		for(int ii=0; ii<bs; ii++) {
+			for(int jj=0; jj<bs; jj++) {
+				ret[bs-jj-1][ii] = x[ii][jj];
 			}
 		}
 		return ret;
@@ -74,20 +106,84 @@ Board dihedral_reflection(int i, Board& x)
 			x = rot90(x);
 		}
 
-		if(i <- 4) {
+		if(i < -4) {
 			x = fliplr(x);
 		}
 	}
-	
+	return x;
+}
+
+vector<vector<double> > dihedral_reflection_rotation(int i, vector<vector<double> > x)
+{
+	typedef vector<vector<double> > VVD;
+	function<VVD(VVD&)> fliplr = [](VVD& x)->VVD{
+		int bs = (int)x.size();
+		VVD ret = vector<vector<double> > (bs, vector<double>(bs, 0));
+		for(int ii=0; ii<bs; ii++) {
+			for(int jj=0; jj<bs; jj++) {
+				ret[ii][jj] = x[ii][bs-jj-1];
+			}
+		}
+		return ret;
+	};
+	function<VVD(VVD&)> rot90 = [](VVD& x)->VVD{
+		int bs = (int)x.size();
+		VVD ret = vector<vector<double> > (bs, vector<double>(bs, 0));
+		for(int ii=0; ii<bs; ii++) {
+			for(int jj=0; jj<bs; jj++) {
+				ret[bs-jj-1][ii] = x[ii][jj];
+			}
+		}
+		return ret;
+	};
+
+	if(i > 0) {
+		if(i > 4) {
+			x = fliplr(x);
+			i -= 4;
+		}
+		for(int j=0; j<i; j++) {
+			x = rot90(x);
+		}
+	} else if(i < 0) {
+		int ii = -i;
+		if(ii > 4) {
+			ii -= 4;
+		}
+		for(int j=0; j<4-ii; j++) {
+			x = rot90(x);
+		}
+
+		if(i < -4) {
+			x = fliplr(x);
+		}
+	}
 	return x;
 }
 
 
-/*
-PV_pair evaluate_with_network(BoardState& board_state, vector<BoardState>& state_list)
+
+
+PV_pair evaluate_with_network(BoardState& state, vector<BoardState>& state_list)
 {
+	int i = rand()%8 + 1;
+	Board board = dihedral_reflection_rotation(i, state.board);
+	int turn = state.turn;
+	vector<Board> s = preproc_board(board, turn);
+
+	pair<vector<vector<double> >, double> pv = network.get_output(s);
+	auto p = pv.first;
+	double v = pv.second;
+	p = dihedral_reflection_rotation(-i, p);
+	map<BoardState, double> p_dict;
+	for(auto& new_state : state_list) {
+		int r = new_state.last_row;
+		int c = new_state.last_col;
+		p_dict[new_state] = p[r][c];
+	}
+	return make_pair(p_dict, v);
 }
-*/
+
 
 
 PV_pair evaluate_with_heuristic(BoardState& state, vector<BoardState>& state_list)
@@ -150,8 +246,6 @@ Node* Node::select()
 	vector<double> noise = Dirichlet(DIR_ALPHA, (int)child_list.size());
 	int idx = 0;
 	for(auto& child : child_list) {
-		//NQWPU_type& nqwpu = NQWPU[child];
-
 		if(parent == NULL) {
 			p = (1-EPSILON)*(child->P) + EPSILON*noise[idx++];
 		} else {
@@ -186,19 +280,12 @@ void Node::expand()
 	for(auto& state : state_list) {
 		Node* new_node = new Node(state, evaluate, this);
 		child_list.push_back(new_node);
-		//NQWPU[new_node] = make_tuple(0, 0, 0, p[state], 0);
+		
 		new_node->N = 0;
 		new_node->Q = 0;
 		new_node->W = 0;
 		new_node->P = p[state];
 		new_node->U = 0;
-		/*
-		N[new_node] = 0;
-		Q[new_node] = 0;
-		W[new_node] = 0;
-		P[new_node] = p[state];
-		U[new_node] = 0;
-		*/
 	}
 	if(parent != NULL) {
 		parent->backup(v, this);
@@ -207,8 +294,6 @@ void Node::expand()
 
 void Node::backup(double v, Node* child)
 {
-	//NQWPU_type& nqwpu = NQWPU[child];
-
 	child->N += 1;
 	N_sum++;
 	child->W += v;
@@ -276,6 +361,7 @@ MCTS::MCTS(
 )
 {
 	root = new Node(BoardState(board_size, 0), evaluate);
+	network = Network(BS, 5, 9, IS_TRAINABLE);
 }
 
 void MCTS::search(Node* node)
