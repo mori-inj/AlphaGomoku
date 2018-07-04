@@ -1,6 +1,8 @@
 #include "mcts_agent.h"
 
-MCTSAgent::MCTSAgent() : mcts(BOARD_SIZE, evaluate_with_heuristic)
+#define EVALUATE evaluate_with_network //evaluate_with_heuristic
+
+MCTSAgent::MCTSAgent() : mcts(BOARD_SIZE, EVALUATE)
 {
 	delete(mcts.root);
 	mcts.root = NULL;
@@ -9,7 +11,7 @@ MCTSAgent::MCTSAgent() : mcts(BOARD_SIZE, evaluate_with_heuristic)
 BoardState MCTSAgent::play(BoardState board_state)
 {
 	if(mcts.root == NULL) {
-		mcts.root = new Node(board_state, evaluate_with_heuristic);
+		mcts.root = new Node(board_state, EVALUATE);
 	} else {
 		Node* next_node = NULL;
 		for(auto& child : mcts.root->child_list) {
@@ -35,8 +37,9 @@ BoardState MCTSAgent::play(BoardState board_state)
 	Node* old_node = mcts.root;
 	mcts.root = mcts.play(mcts.root, TEMPERATURE);
 	for(auto& child : old_node->child_list) {
-		if(child != mcts.root)
+		if(child != mcts.root) {
 			child->clear();
+		}
 	}
 	delete(old_node);
 	board_state = mcts.root->state;
