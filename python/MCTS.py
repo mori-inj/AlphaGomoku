@@ -12,8 +12,7 @@ DIR_ALPHA = 0.5
 
 heuristic = HeuristicAgent()
 
-IS_TRAINABLE = False
-network = Network(board_size = BS, input_frame_num = 3, residual_num = 9, is_trainable=IS_TRAINABLE)
+network = Network(board_size = BS, input_frame_num = 3, residual_num = 9, is_trainable=False)
 # input_frame_num = 5 means, past 2 mover per each player + 1
 
 def get_next_states(state):
