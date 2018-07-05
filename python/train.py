@@ -20,7 +20,6 @@ network = Network(board_size = BS, input_frame_num = 3, residual_num = 9, is_tra
 input_list = []
 pi_list = []
 z_list = []
-t_list = []
 
 for iteration in range(SELF_PLAY_NUM):
     mcts = MCTS(BS, evaluate_with_heuristic)
@@ -71,7 +70,6 @@ for iteration in range(SELF_PLAY_NUM):
                     z_list.append([1])
                 else:
                     z_list.append([-1])
-                t_list.append([float(next_state.turn)])
             break
         elif next_state.turn == BS*BS:
             input_board = preproc_board(next_board, next_state.turn)
@@ -86,7 +84,6 @@ for iteration in range(SELF_PLAY_NUM):
             nst = next_state.turn + 1
             for _ in range(nst):
                 z_list.append([0])
-                t_list.append([float(next_state.turn)])
             break
 
     if iteration % SELF_PLAY_ITER == 0:
@@ -104,7 +101,6 @@ for iteration in range(SELF_PLAY_NUM):
         input_ = np.asarray([input_list[idx] for idx in index])
         pi_ = np.asarray([pi_list[idx] for idx in index])
         z_ = np.asarray([z_list[idx] for idx in index])
-        t_ = np.asarray([t_list[idx] for idx in index])
     
     """ 
     print('==========input========')
@@ -148,7 +144,7 @@ for iteration in range(SELF_PLAY_NUM):
     """
 
     if iteration % SELF_PLAY_ITER == 0:
-        network.train(input_, pi_, z_, t_, TRAIN_ITER, PRINT_ITER) 
+        network.train(input_, pi_, z_, TRAIN_ITER, PRINT_ITER) 
 
 for iteration in range(AFTER_NUM):
     print('============ iter:' + str(iteration) + '=============')
@@ -166,5 +162,4 @@ for iteration in range(AFTER_NUM):
     input_ = np.asarray([input_list[idx] for idx in index])
     pi_ = np.asarray([pi_list[idx] for idx in index])
     z_ = np.asarray([z_list[idx] for idx in index])
-    t_ = np.asarray([t_list[idx] for idx in index])
-    network.train(input_, pi_, z_, t_, TRAIN_ITER, PRINT_ITER)
+    network.train(input_, pi_, z_, TRAIN_ITER, PRINT_ITER)

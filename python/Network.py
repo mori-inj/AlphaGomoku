@@ -55,7 +55,6 @@ class Network:
             self.X = tf.placeholder(tf.float32, [None, self.board_size, self.board_size, self.input_frame_num])
             self.pi = tf.placeholder(tf.float32, [None, self.board_size**2])
             self.Z = tf.placeholder(tf.float32, [None, 1])
-            self.T = tf.placeholder(tf.float32, [None, 1])
 
             X = ConvBlock(self.X)
             
@@ -69,7 +68,7 @@ class Network:
             var = tf.trainable_variables()
             theta = tf.reduce_mean(tf.add_n([tf.nn.l2_loss(v) for v in var]) )*1e-4
             self.value_loss = tf.reduce_mean((self.Z - self.V)**2)
-            self.policy_loss = tf.reduce_mean( - self.pi * tf.log(tf.maximum(self.P,1e-7)))
+            self.policy_loss = tf.reduce_mean( - tf.reduce_sum( tf.multiply(self.pi, tf.log(tf.maximum(self.P,1e-7))), 1, keep_dims=True))
             #self.policy_loss = tf.reduce_mean(tf.nn.sigmoid_cross_entropy_with_logits(labels=self.pi, logits=self.P))
             self.loss = self.value_loss + self.policy_loss + theta
             
@@ -88,10 +87,10 @@ class Network:
         else:
             self.saver.restore(self.sess,"./AlphaGomoku.ckpt")
 
-    def train(self, X_, pi_, Z_, T_, it, prt_it):
+    def train(self, X_, pi_, Z_, it, prt_it):
         if self.is_trainable:
             for i in range(it): # TODO should change # of iteration steps
-                fd = {self.X: X_, self.pi: pi_, self.Z: Z_, self.T: T_}
+                fd = {self.X: X_, self.pi: pi_, self.Z: Z_}
                 self.sess.run(self.train_model, feed_dict=fd)
                 if i % prt_it == 0:
                     print('======= ' + str(i) + ' =======')
