@@ -56,7 +56,6 @@ class Network:
             self.X = tf.placeholder(tf.float32, [None, self.board_size, self.board_size, self.input_frame_num])
             self.pi = tf.placeholder(tf.float32, [None, self.board_size**2])
             self.Z = tf.placeholder(tf.float32, [None, 1])
-            self.T = tf.placeholder(tf.float32, [None, 1])
 
             X = ConvBlock(self.X)
             
@@ -70,7 +69,7 @@ class Network:
             var = tf.trainable_variables()
             theta = tf.reduce_mean(tf.add_n([tf.nn.l2_loss(v) for v in var]) )*1e-4
             self.value_loss = tf.reduce_mean((self.Z - self.V)**2)
-            self.policy_loss = tf.reduce_mean( - self.pi * tf.log(tf.maximum(self.P,1e-7)))
+            self.policy_loss = tf.reduce_mean( - tf.reduce_sum( tf.multiply(self.pi, tf.log(tf.maximum(self.P,1e-7))), 1, keep_dims=True))
             #self.policy_loss = tf.reduce_mean(tf.nn.sigmoid_cross_entropy_with_logits(labels=self.pi, logits=self.P))
             self.loss = self.value_loss + self.policy_loss + theta
             
@@ -101,7 +100,6 @@ class Network:
                 os.system("rm con_network_input.txt")
                 input_data = [x.strip() for x in input_data]
 
-                #prproc TODO
                 cnt = 0
                 s = [0] * input_frame_num
                 for fn in range(input_frame_num):
@@ -130,14 +128,65 @@ class Network:
                 f.close()
 
             if os.path.isfile("con_train_data.txt"):
-                #TODO
-                pass
+                f = open("con_network_training","w")
+                f.close()
+
+                #prproc TODO
+                input_data = []
+                while len(input_data) == 0:
+                    with open("con_train_data.txt") as f:
+                        input_data = f.readlines() 
+                os.system("rm con_train_data.txt")
+                input_data = [x.strip() for x in input_data]
+
+                data_num = int(input_data[0].split(' ')[0])
+                iteration = int(input_data[0].split(' ')[1])
+                print_iter = int(input_data[0].split(' ')[2])
+
+                input_data = input_data[1:]
+
+                X = np.zeros([data_num, input_frame_num]).tolist()
+                P = [0] * data_num
+                Z = [0] * data_num
+
+                cnt = 0
+                for n in range(data_num):
+                    for fn in range(input_frame_num):
+                        X[n][fn] = np.zeros([board_size, board_size])
+                        for i in range(board_size):
+                            t = input_data[cnt].split(' ')
+                            t = [float(x) for x in t]
+                            for j in range(board_size):
+                                X[n][fn][i][j] = t[j]
+                            cnt += 1
+                        cnt += 1
+
+                    P[n] = np.zeros([board_size, board_size])
+                    for i in range(board_size):
+                        t = input_data[cnt].split(' ')
+                        t = [float(x) for x in t]
+                        for j in range(board_size):
+                            P[n][i][j] = t[j]
+                        cnt += 1
+                    Z[n] = float(input_data[cnt])
+                    cnt += 1
+                    cnt += 1
+
+                X = np.asarray(X)
+                P = np.asarray(P)
+                Z = np.asarray(Z)
+
+                X = np.transpose(X, [0,3,1,2])
+
+                self.train(X, P, Z, iteration, print_iter)
+
+                os.system("rm con_network_training")
 
 
-    def train(self, X_, pi_, Z_, T_, it, prt_it):
+    def train(self, X_, pi_, Z_, it, prt_it):
         if self.is_trainable:
             for i in range(it): # TODO should change # of iteration steps
-                fd = {self.X: X_, self.pi: pi_, self.Z: Z_, self.T: T_}
+                fd = {self.X: X_, self.pi: pi_, self.Z: Z_}
                 self.sess.run(self.train_model, feed_dict=fd)
                 if i % prt_it == 0:
                     print('======= ' + str(i) + ' =======')

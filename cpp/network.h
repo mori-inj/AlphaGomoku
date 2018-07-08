@@ -13,10 +13,17 @@ class Network
 		int residual_num;
 		bool is_trainable;
 		
-		//void train(); TODO
-		//bool is_training();
-		//void wait_training();
 		pair<vector<vector<double> >, double> get_output(vector<Board>& s);
+		void train(
+			vector<vector<Board> > X,
+			vector<vector<vector<double> > > P,
+			vector<double> Z,
+			int iter,
+			int print_iter
+		);
+		bool is_training();
+		void wait_training();
+
 };
 
 #endif

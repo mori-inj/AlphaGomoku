@@ -8,7 +8,6 @@
 #include <functional>
 #include <random>
 
-const bool IS_TRAINABLE = false;
 Network network;
 //input_frame_num = 5 means, past 2 moves per each player + 1
 
@@ -361,7 +360,7 @@ MCTS::MCTS(
 )
 {
 	root = new Node(BoardState(board_size, 0), evaluate);
-	network = Network(BS, 5, 9, IS_TRAINABLE);
+	network = Network(BS, 5, 9, false);
 }
 
 void MCTS::search(Node* node)

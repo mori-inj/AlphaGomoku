@@ -16,7 +16,6 @@
 void play()
 {
 	srand((unsigned)time(NULL));
-
 		
 	if(!SELFPLAY) {
 		AA AgentA;

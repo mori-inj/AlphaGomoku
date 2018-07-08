@@ -30,7 +30,7 @@ Network::Network(int bs, int ifn, int rn, bool it)
 pair<vector<vector<double> >, double> Network::get_output(vector<Board>& s)
 {
 	FILE* fp = fopen("con_network_input.txt", "w");
-	for(int f=0; f<(int)s.size(); f++) {
+	for(int f=0; f<input_frame_num; f++) {
 		for(int i=0; i<board_size; i++) {
 			for(int j=0; j<board_size; j++) {
 				fprintf(fp, "%d ",s[f][i][j]);
@@ -40,7 +40,9 @@ pair<vector<vector<double> >, double> Network::get_output(vector<Board>& s)
 		fprintf(fp, "\n");
 	}
 	fclose(fp);
+
 	while(!(fp = fopen("con_network_output.txt","r")));
+
 	auto P = vector<vector<double> > (board_size, vector<double>(board_size, 0.0));
 	double V;
 	for(int i=0; i<board_size; i++) {
@@ -53,4 +55,58 @@ pair<vector<vector<double> >, double> Network::get_output(vector<Board>& s)
 	system("rm con_network_output.txt");
 
 	return make_pair(P,V);
+}
+
+void Network::train(
+	vector<vector<Board> > X,
+	vector<vector<vector<double> > > P,
+	vector<double> Z,
+	int iter,
+	int print_iter
+)
+{
+	const int data_num = (int)X.size();
+	if((int)P.size() != data_num || (int)Z.size() != data_num) {
+		printf("can not train\n");
+		return;
+	}
+
+	FILE* fp = fopen("con_train_data.txt","w");
+	fprintf(fp, "%d %d %d\n",data_num, iter, print_iter);
+	for(int n=0; n<data_num; n++) {
+		for(int f=0; f<input_frame_num; f++) {
+			for(int i=0; i<board_size; i++) {
+				for(int j=0; j<board_size; j++) {
+					fprintf(fp, "%d ", X[n][f][i][j]);
+				}
+				fprintf(fp, "\n");
+			}
+			fprintf(fp, "\n");
+		}
+		for(int i=0; i<board_size; i++) {
+			for(int j=0; j<board_size; j++) {
+				fprintf(fp, "%lf ", P[n][i][j]);
+			}
+			fprintf(fp, "\n");
+		}
+		fprintf(fp, "%lf\n",Z[n]);
+		fprintf(fp, "\n");
+	}
+}
+
+bool Network::is_training()
+{
+	FILE* fp = fopen("con_network_training","r");
+	if(fp==NULL) {
+		fclose(fp);
+		return false;
+	}
+	fclose(fp);
+	return true;
+}
+
+void Network::wait_training()
+{
+	FILE* fp;
+	while((fp = fopen("con_network_training","r"))) fclose(fp);
 }
