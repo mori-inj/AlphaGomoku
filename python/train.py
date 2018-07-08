@@ -52,8 +52,8 @@ for iteration in range(SELF_PLAY_NUM):
         
         next_state = node.state
         next_board = next_state.board 
-        r = next_state.last_row
-        c = next_state.last_col
+        #r = next_state.last_row
+        #c = next_state.last_col
 
         if is_game_ended(next_board):
             input_board = preproc_board(next_board, next_state.turn)
