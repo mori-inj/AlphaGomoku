@@ -2,6 +2,7 @@
 
 #include "gomoku.h"
 #include "mcts_agent.h"
+#include "heuristic_agent.h"
 #include "network.h"
 
 #include <stdlib.h>
@@ -10,6 +11,8 @@
 #include <algorithm>
 
 using namespace std;
+
+const int ITER = 1000;
 
 const int MCTS_SEARCH_NUM = 2;//150;
 const int SELF_PLAY_NUM = 2000; //number of games
