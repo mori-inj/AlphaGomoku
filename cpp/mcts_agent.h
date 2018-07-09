@@ -5,16 +5,19 @@
 
 #include "mcts.h"
 
-const int MCTS_SEARCH_NUM = 150;
-const double TEMPER_EPS = 2e-1;
-const double TEMPERATURE = TEMPER_EPS;
 
 class MCTSAgent
 {
 	public:
-		MCTS mcts;
 		MCTSAgent();
+		MCTSAgent(int msn, double te);
+		MCTS mcts;
+		int MCTS_SEARCH_NUM;
+		double TEMPER_EPS;
+		double TEMPERATURE;
 		BoardState play(BoardState board_state);
+		pair<vector<vector<double> >, BoardState> get_pi_and_play(BoardState board_state);
+		vector<vector<double> > get_pi();
 		void clear();
 };
 

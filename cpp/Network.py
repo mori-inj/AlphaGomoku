@@ -118,7 +118,7 @@ class Network:
                 P,V = self.get_output(s)
                 P = np.reshape(P, [board_size, board_size])
                 
-                f = open("con_network_output.txt","w")
+                f = open("con_network_output.txt_","w")
                 for i in range(board_size):
                     s = ""
                     for j in range(board_size):
@@ -126,12 +126,12 @@ class Network:
                     f.write(s+"\n")
                 f.write(str(float(V))+"\n")
                 f.close()
+                os.system("mv con_network_output.txt_ con_network_output.txt")
 
             if os.path.isfile("con_train_data.txt"):
                 f = open("con_network_training","w")
                 f.close()
 
-                #prproc TODO
                 input_data = []
                 while len(input_data) == 0:
                     with open("con_train_data.txt") as f:
@@ -168,7 +168,7 @@ class Network:
                         for j in range(board_size):
                             P[n][i][j] = t[j]
                         cnt += 1
-                    Z[n] = float(input_data[cnt])
+                    Z[n] = [float(input_data[cnt])]
                     cnt += 1
                     cnt += 1
 
@@ -176,7 +176,8 @@ class Network:
                 P = np.asarray(P)
                 Z = np.asarray(Z)
 
-                X = np.transpose(X, [0,3,1,2])
+                X = np.transpose(X, [0,2,3,1])
+                P = np.reshape(P, [-1,board_size*board_size])
 
                 self.train(X, P, Z, iteration, print_iter)
 

@@ -360,7 +360,7 @@ MCTS::MCTS(
 )
 {
 	root = new Node(BoardState(board_size, 0), evaluate);
-	network = Network(BS, 5, 9, false);
+	//network = Network(BS, 5, 9, false); //FIXME
 }
 
 void MCTS::search(Node* node)

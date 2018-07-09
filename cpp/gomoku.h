@@ -5,8 +5,8 @@
 
 using namespace std;
 
-const int BOARD_SIZE = 9;
-const int N_IN_A_ROW = 5;
+const int BOARD_SIZE = 3;
+const int N_IN_A_ROW = 3;
 
 typedef vector<vector<int> > Board;
 

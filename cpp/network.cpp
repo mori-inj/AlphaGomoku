@@ -13,8 +13,7 @@ Network::Network(int bs, int ifn, int rn, bool it)
 	system("rm con_*");
 	system("touch con_python_enable");
 	char str[2048] = "";
-	//sprintf(str,"python3 -c \"from Network import *; network = Network(board_size = %d, input_frame_num = %d, residual_num = %d, is_trainable=%s)\" &", bs,ifn, rn, it?"True":"False");
-	sprintf(str,"python3 -c \"from Network import *; network = Network(board_size = %d, input_frame_num = %d, residual_num = %d, is_trainable=True)\" &", bs,ifn, rn);
+	sprintf(str,"python3 -c \"from Network import *; network = Network(board_size = %d, input_frame_num = %d, residual_num = %d, is_trainable=%s)\" &", bs,ifn, rn, it?"True":"False");
 	system(str);
 
 	FILE* fp;
@@ -29,7 +28,7 @@ Network::Network(int bs, int ifn, int rn, bool it)
 
 pair<vector<vector<double> >, double> Network::get_output(vector<Board>& s)
 {
-	FILE* fp = fopen("con_network_input.txt", "w");
+	FILE* fp = fopen("con_network_input.txt_", "w");
 	for(int f=0; f<input_frame_num; f++) {
 		for(int i=0; i<board_size; i++) {
 			for(int j=0; j<board_size; j++) {
@@ -40,6 +39,7 @@ pair<vector<vector<double> >, double> Network::get_output(vector<Board>& s)
 		fprintf(fp, "\n");
 	}
 	fclose(fp);
+	system("mv con_network_input.txt_ con_network_input.txt");
 
 	while(!(fp = fopen("con_network_output.txt","r")));
 
@@ -71,7 +71,7 @@ void Network::train(
 		return;
 	}
 
-	FILE* fp = fopen("con_train_data.txt","w");
+	FILE* fp = fopen("con_train_data.txt_","w");
 	fprintf(fp, "%d %d %d\n",data_num, iter, print_iter);
 	for(int n=0; n<data_num; n++) {
 		for(int f=0; f<input_frame_num; f++) {
@@ -92,6 +92,8 @@ void Network::train(
 		fprintf(fp, "%lf\n",Z[n]);
 		fprintf(fp, "\n");
 	}
+	fclose(fp);
+	system("mv con_train_data.txt_ con_train_data.txt");
 }
 
 bool Network::is_training()
