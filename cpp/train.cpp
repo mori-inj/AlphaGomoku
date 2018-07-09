@@ -99,6 +99,48 @@ void train()
 		if(iteration % SELF_PLAY_ITER == 0) {
 			network.train(input_list, pi_list, z_list, TRAIN_ITER, PRINT_ITER);
 			network.wait_training();
+
+
+			int x_count = 0;
+			int o_count = 0;
+			int draw_count = 0;
+
+			for(int i=0; i<ITER; i++) {
+				HeuristicAgent AA;
+				MCTSAgent BB;
+
+				Gomoku gomoku(BOARD_SIZE, N_IN_A_ROW);
+				int turn = 0;
+				bool draw_flag = true;
+				BoardState board_state = gomoku.board;
+
+				while(!gomoku.is_game_ended() && board_state.turn != BOARD_SIZE*BOARD_SIZE) {
+					if(board_state.turn % 2 == 0) {
+						board_state = AgentA.play(board_state);
+					} else {
+						board_state = AgentB.play(board_state);
+					}
+					gomoku.board = board_state;
+
+					if(gomoku.is_game_ended()) {
+						if(board_state.turn%2*2-1 == 1) {
+							x_count++;
+						} else {
+							o_count++;
+						}
+						draw_flag = false;
+						break;
+					}
+				}
+				if(draw_flag) {
+					draw_count++;
+				}
+
+				AgentA.clear();
+				AgentB.clear();
+			}
+			printf("win rate: %d %d %d\n\n",x_count, o_count, draw_count);
+
 		}
 	}
 	for(int iteration=0; iteration<AFTER_NUM; iteration++) {
