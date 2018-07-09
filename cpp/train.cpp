@@ -106,8 +106,8 @@ void train()
 			int draw_count = 0;
 
 			for(int i=0; i<ITER; i++) {
-				HeuristicAgent AA;
-				MCTSAgent BB;
+				HeuristicAgent AgentA;
+				MCTSAgent AgentB;
 
 				Gomoku gomoku(BOARD_SIZE, N_IN_A_ROW);
 				int turn = 0;
