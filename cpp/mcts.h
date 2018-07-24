@@ -8,12 +8,6 @@
 
 using namespace std;
 
-const int BS = BOARD_SIZE;
-const double C_PUCT = 5;
-const double EPSILON = 0.25;
-const double DIR_ALPHA = 0.5;
-
-typedef tuple<int, double, double, double, double> NQWPU_type;
 typedef map<BoardState, double> Dict;
 typedef pair<Dict, double> PV_pair;
 vector<BoardState> get_next_states(BoardState& state);
@@ -21,6 +15,7 @@ vector<Board> preproc_board(Board& board, int turn);
 Board dihedral_reflection_rotation(int i, Board x);
 vector<vector<double> > dihedral_reflection_rotation(int i, vector<vector<double> > x);
 PV_pair evaluate_with_network(BoardState& state, vector<BoardState>& state_list);
+PV_pair evaluate_with_random(BoardState& state, vector<BoardState>& state_list);
 PV_pair evaluate_with_heuristic(BoardState& state, vector<BoardState>& state_list);
 
 class Node

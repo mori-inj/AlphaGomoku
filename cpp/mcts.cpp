@@ -1,5 +1,6 @@
 #include "mcts.h"
 
+#include "params.h"
 #include "network.h"
 #include "heuristic_agent.h"
 
@@ -7,6 +8,8 @@
 #include <cfloat>
 #include <functional>
 #include <random>
+
+const int BS = BOARD_SIZE;
 
 Network network;
 //input_frame_num = 5 means, past 2 moves per each player + 1
@@ -35,7 +38,7 @@ vector<BoardState> get_next_states(BoardState& state)
 
 vector<Board> preproc_board(Board& board, int turn)
 {
-	int frame = network.input_frame_num;
+	int frame = INPUT_FRAME_NUM;
 	vector<Board> s(frame, vector<vector<int> > (BS, vector<int>(BS, 0)));
 	for(int fn=0; fn<(frame-1)/2; fn++) {
 		for(int i=0; i<BS; i++) {
@@ -185,6 +188,28 @@ PV_pair evaluate_with_network(BoardState& state, vector<BoardState>& state_list)
 
 
 
+PV_pair evaluate_with_random(BoardState& state, vector<BoardState>& state_list)
+{
+	double v = (rand()%2000)/1000.0 - 1;
+	map<BoardState, double> p_dict;
+	double p_sum = 0;
+	for(auto& new_state : state_list) {
+		int r = new_state.last_row;
+		int c = new_state.last_col;
+		double p = (rand()%1000)/1000.0;
+		p_dict[new_state] = p;
+		p_sum += p;
+	}
+
+	for(auto& p : p_dict) {
+		p.second /= p_sum;
+	}
+
+	return make_pair(p_dict, v);
+}
+
+
+
 PV_pair evaluate_with_heuristic(BoardState& state, vector<BoardState>& state_list)
 {
 	return heuristic.evaluate(state, state_list);
@@ -201,7 +226,12 @@ Node::Node(
 	evaluate = f;
 	parent = p;
 	state = s;
+	N = 0;
 	N_sum = 0;
+	Q = 0;
+	W = 0;
+	P = 0;
+	U = 0;
 	selected_child = NULL;
 }
 
@@ -279,12 +309,7 @@ void Node::expand()
 	for(auto& state : state_list) {
 		Node* new_node = new Node(state, evaluate, this);
 		child_list.push_back(new_node);
-		
-		new_node->N = 0;
-		new_node->Q = 0;
-		new_node->W = 0;
 		new_node->P = p[state];
-		new_node->U = 0;
 	}
 	if(parent != NULL) {
 		parent->backup(v, this);

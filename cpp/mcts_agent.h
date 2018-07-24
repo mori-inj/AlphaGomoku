@@ -10,11 +10,9 @@ class MCTSAgent
 {
 	public:
 		MCTSAgent();
-		MCTSAgent(int msn, double te);
+		MCTSAgent(int msn);
 		MCTS mcts;
-		int MCTS_SEARCH_NUM;
-		double TEMPER_EPS;
-		double TEMPERATURE;
+		double temperature;
 		BoardState play(BoardState board_state);
 		pair<vector<vector<double> >, BoardState> get_pi_and_play(BoardState board_state);
 		vector<vector<double> > get_pi();

@@ -187,8 +187,15 @@ class Network:
     def train(self, X_, pi_, Z_, it, prt_it):
         if self.is_trainable:
             for i in range(it): # TODO should change # of iteration steps
+                for batch in range(BATCH_SIZE//MINI_BATCH_SIZE):
+                    fd = {
+                            self.X: X_[batch*MINI_BATCH_SIZE:(batch+1)*MINI_BATCH_SIZE],
+                            self.pi: pi_[batch*MINI_BATCH_SIZE:(batch+1)*MINI_BATCH_SIZE],
+                            self.Z: Z_[batch*MINI_BATCH_SIZE:(batch+1)*MINI_BATCH_SIZE]
+                    }
+                    self.sess.run(self.train_model, feed_dict=fd)
+
                 fd = {self.X: X_, self.pi: pi_, self.Z: Z_}
-                self.sess.run(self.train_model, feed_dict=fd)
                 if i % prt_it == 0:
                     print('======= ' + str(i) + ' =======')
                     l, pl, vl = self.sess.run([self.loss, self.policy_loss, self.value_loss], feed_dict=fd)

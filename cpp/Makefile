@@ -8,7 +8,7 @@ main: main.o gomoku.o random_agent.o heuristic_agent.o mcts.o mcts_agent.o netwo
 	$(CC) $(CFLAGS) -o main main.o gomoku.o random_agent.o heuristic_agent.o mcts.o mcts_agent.o network.o play.o train.o
 	rm *.o
 
-main.o: gomoku.h random_agent.h heuristic_agent.h mcts.h mcts_agent.h network.h play.h train.h main.cpp
+main.o: params.h gomoku.h random_agent.h heuristic_agent.h mcts.h mcts_agent.h network.h play.h train.h main.cpp
 gomoku.o: gomoku.h gomoku.cpp
 random_agent.o: random_agent.h random_agent.cpp
 heuristic_agent.o: heuristic_agent.h heuristic_agent.cpp

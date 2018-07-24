@@ -1,5 +1,7 @@
 #include "random_agent.h"
 
+#include "params.h"
+
 #include <stdlib.h>
 
 BoardState RandomAgent::play(BoardState board_state)

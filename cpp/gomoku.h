@@ -5,9 +5,6 @@
 
 using namespace std;
 
-const int BOARD_SIZE = 3;
-const int N_IN_A_ROW = 3;
-
 typedef vector<vector<int> > Board;
 
 bool is_game_ended(Board& board);

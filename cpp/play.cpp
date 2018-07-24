@@ -1,5 +1,6 @@
 #include "play.h"
 
+#include "params.h"
 #include "gomoku.h"
 #include "random_agent.h"
 #include "heuristic_agent.h"
@@ -8,16 +9,11 @@
 #include <stdlib.h>
 #include <time.h>
 
-#define AA HeuristicAgent
-#define BB MCTSAgent
-#define ITER 1000
-#define SELFPLAY true
-
 void play()
 {
 	srand((unsigned)time(NULL));
 		
-	if(!SELFPLAY) {
+	if(SINGLE_PLAY) {
 		AA AgentA;
 		BB AgentB;
 
@@ -56,7 +52,11 @@ void play()
 		int o_count = 0;
 		int draw_count = 0;
 
-		for(int i=0; i<ITER; i++) {
+		for(int i=0; i<TOTAL_GAME_NUM; i++) {
+			if(i % TOTAL_GAME_PRINT == 0) {
+				printf("%d  %d %d %d\n",i,x_count,o_count,draw_count);
+			}
+
 			AA AgentA;
 			BB AgentB;
 

@@ -1,5 +1,7 @@
 #include "heuristic_agent.h"
 
+#include "params.h"
+
 #include <stdlib.h>
 #include <limits.h>
 #include <vector>

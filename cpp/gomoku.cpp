@@ -1,5 +1,7 @@
 #include "gomoku.h"
 
+#include "params.h"
+
 #include <stdio.h>
 
 BoardState::BoardState(int bs, int t)
