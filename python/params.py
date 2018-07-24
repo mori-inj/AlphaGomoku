@@ -16,22 +16,30 @@ INPUT_FRAME_NUM = 5
 RESIDUAL_NUM = 9
 
 #play
+#EVALUATE = "random"
+#EVALUATE = "heuristic"
 EVALUATE = "network"
 
 AgA = "random"
+#AgA = "heuristic"
+#AgA = "MCTS"
+
+#AgB = "random"
+#AgB = "heuristic"
 AgB = "MCTS"
+
 SINGLE_PLAY = False
 
 TOTAL_GAME_NUM = 1000
 TOTAL_GAME_PRINT = 2
 
 #train
-SELF_PLAY_NUM = 2000
+SELF_PLAY_NUM = 2#2000
 TRAIN_ITER = 500
 PRINT_ITER = 100
 
 BATCH_SIZE = 20#2048
 MINI_BATCH_SIZE = 10#32
 
-GAME_NUM = 100
-GAME_PRINT = 5
+GAME_NUM = 10#100
+GAME_PRINT = 2#5
