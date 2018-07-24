@@ -1,3 +1,4 @@
+from params import *
 from Gomoku import *
 from Network import Network
 from HeuristicAgent import HeuristicAgent
@@ -5,14 +6,10 @@ import random
 import math
 
 BS = BOARD_SIZE
-C_PUCT = 5
-EPSILON = 0.25
-DIR_ALPHA = 0.5
-
 
 heuristic = HeuristicAgent()
 
-network = Network(board_size = BS, input_frame_num = 3, residual_num = 9, is_trainable=False)
+network = Network(board_size = BS, input_frame_num = INPUT_FRAME_NUM, residual_num = RESIDUAL_NUM, is_trainable=True) #False
 # input_frame_num = 5 means, past 2 mover per each player + 1
 
 def get_next_states(state):
@@ -29,7 +26,7 @@ def get_next_states(state):
     return sl
 
 def preproc_board(board, turn):
-    frame = network.input_frame_num
+    frame = INPUT_FRAME_NUM
     
     s = [0] * frame
     for fn in range((frame-1)//2):
@@ -92,6 +89,23 @@ def evaluate_with_network(state, state_list):
         p_dict[new_state] = p[r][c]
     return p_dict,v
 
+def evaluate_with_random(state, state_list):
+    v = random.uniform(-1, 1)
+    p_dict = {}
+    p_sum = 0
+    for new_state in state_list:
+        r = new_state.last_row
+        c = new_state.last_col
+        p = random.uniform(0, 1)
+        p_dict[new_state] = p
+        p_sum += p
+
+    for p in p_dict:
+        p_dict[p] /= p_sum
+
+    return p_dict,v
+
+
 def evaluate_with_heuristic(state, state_list):
     p_dict, v = heuristic.evaluate(state, state_list)
     return p_dict, v
@@ -102,12 +116,12 @@ class Node:
         self.parent = parent
         self.state = state
         self.child_list = []
-        self.N = {}
+        self.N = 0
         self.N_sum = 0
-        self.Q = {}
-        self.W = {}
-        self.P = {}
-        self.U = {}
+        self.Q = 0
+        self.W = 0
+        self.P = 0
+        self.U = 0
         self.selected_child = None
     
     def search(self):
@@ -131,13 +145,13 @@ class Node:
         idx = 0
         for child in self.child_list:
             if self.parent == None: # node is root
-                P = (1-EPSILON)*self.P[child] + EPSILON*noise[idx]
+                P = (1-EPSILON)*child.P + EPSILON*noise[idx]
                 idx += 1
             else:
-                P = self.P[child]
-            U = P * const / (1 + self.N[child])
-            self.U[child] = U
-            QU = self.Q[child] + U
+                P = child.P
+            U = P * const / (1 + child.N)
+            child.U = U
+            QU = child.Q + U
             if QU_max < QU:
                 QU_max = QU
                 max_child = child
@@ -156,27 +170,23 @@ class Node:
         for state in state_list:
             new_node = Node(state, self.evaluate, self)
             self.child_list.append(new_node)
-            self.N[new_node] = 0
-            self.Q[new_node] = 0
-            self.W[new_node] = 0
-            self.P[new_node] = p[state]
-            self.U[new_node] = 0
+            new_node.P = p[state]
         if self.parent != None:
             self.parent.backup(v, self)
 
     def backup(self, v, child):
-        self.N[child] += 1
+        child.N += 1
         self.N_sum += 1
-        self.W[child] += v
-        self.Q[child] = self.W[child] / self.N[child]
+        child.W+= v
+        child.Q = child.W / child.N
         if self.parent != None:
             self.parent.backup(v, self)
     
     def get_pi(self, t):
         pi = {}
         N_s = 1e-9
-        for n in self.N:
-            pi[n] = self.N[n] ** (1/t)
+        for n in self.child_list:
+            pi[n] = n.N ** (1/t)
             N_s += pi[n]
         
         for n in pi:
@@ -196,7 +206,7 @@ class Node:
             if N_list[i][0] >= r:
                 return N_list[i][1]
         
-        print('Exception on \'play\' line:196 ', len(self.N))
+        print('Exception on \'play\' line:196 ', len(self.child_list))
         print('Exception on \'play\' line:197 ', len(N_list))
         print('Exception on \'play\' line:198 ', len(pi))
         return N_list[-1][1]

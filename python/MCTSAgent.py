@@ -1,11 +1,15 @@
+from params import *
 from Gomoku import *
 from MCTS import *
 
-MCTS_SEARCH_NUM = 128
 
-TEMPER_EPS = 1e-2
-TEMPERATURE = TEMPER_EPS
-EVALUATE = evaluate_with_heuristic
+if EVALUATE == "random":
+    EVALUATE = evaluate_with_random
+elif EVALUATE == "heuristic":
+    EVALUATE = evaluate_with_heuristic
+elif EVALUATE == "network":
+    EVALUATE = evaluate_with_network
+
 
 class MCTSAgent:
     def __init__(self):
@@ -15,7 +19,7 @@ class MCTSAgent:
         mcts = MCTS(BOARD_SIZE, EVALUATE)
         mcts.root = Node(board_state, EVALUATE)
 
-        for i in range(MCTS_SEARCH_NUM):
+        for i in range(MCTS_SIM_NUM):
             mcts.search(mcts.root)
 
         node = mcts.play(mcts.root, TEMPERATURE)

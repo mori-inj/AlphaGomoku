@@ -1,53 +1,5 @@
+from params import *
 import numpy as np
-
-BOARD_SIZE = 3
-N_IN_A_ROW = 3
-GRID_SIZE = 15#25
-STONE_SIZE = 6#10
-BDS = max(GRID_SIZE * (BOARD_SIZE -1) + STONE_SIZE + 16 + BOARD_SIZE*3, 170)
-HEIGHT = BDS
-WIDTH = BDS
-
-bs = (GRID_SIZE) * (BOARD_SIZE-1) + 1
-SX = int(BDS/2 - bs/2.0)
-SY= int(BDS/2 - bs/2.0)
-EX = SX + bs
-EY = SY + bs
-
-
-
-def draw_board(canvas, sx, sy, board, node=None, parent=None, selected=None):
-    ex = sx + bs
-    ey = sy + bs
-    BOARD_SIZE = board.board_size
-    if selected != None and selected == True:
-        canvas.draw_circle(sx+bs/2, sy+bs/2, bs*1.1, fill="", outline="#FFF", width=1)
-
-    for i in range(BOARD_SIZE):
-        canvas.create_line(sx+i*GRID_SIZE, sy, sx+i*GRID_SIZE, ey, fill="#FFF")
-    for i in range(BOARD_SIZE):
-        canvas.create_line(sx, sy+i*GRID_SIZE, ex, sy+i*GRID_SIZE, fill="#FFF")
-    
-    for i in range(BOARD_SIZE):
-        for j in range(BOARD_SIZE):
-            x = sx + j*GRID_SIZE
-            y = sy + i*GRID_SIZE
-            if board[i][j] == 0:
-                continue
-            if board[i][j]%2*2-1 == -1:
-                canvas.draw_circle(x, y, STONE_SIZE, fill="#FFF", outline="#FFF", width=1)
-            elif board[i][j]%2*2-1 == 1:
-                canvas.draw_circle(x, y, STONE_SIZE, fill="#000", outline="#FFF", width=1)
-    
-    if node != None and parent != None:
-        txt = ""
-        txt += "N:%.0f\n" % parent.N[node]
-        txt += "W:%.2f\n" % parent.W[node]
-        txt += "P:%.2f\n" % parent.P[node]
-        txt += "Q+U:%.2f+%.2f=%.2f\n" % (parent.Q[node], parent.U[node], (parent.U[node] + parent.Q[node]) ) # for debug
-        ci = canvas.create_text(sx, sy+bs, anchor="nw", fill="#FFF", font=("Purisa", 10), text=txt)
-
-
 
 def is_game_ended(board):
     turn = np.amax(board) 
