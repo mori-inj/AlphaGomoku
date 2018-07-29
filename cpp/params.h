@@ -1,5 +1,5 @@
 #ifndef __PARAMS__
-#define __PARAMS
+#define __PARAMS__
 
 //gomoku
 const int BOARD_SIZE = 9;
@@ -10,7 +10,7 @@ const double C_PUCT = 5;
 const double EPSILON = 0.1; //0.25;
 const double DIR_ALPHA = 0.3; //0.5;
 
-const int MCTS_SIM_NUM = 64;
+const int MCTS_SIM_NUM = 128;
 const double TEMPER_EPS = 1e-1;
 const int TEMPER_THRS = 2;
 
@@ -33,18 +33,18 @@ const int RESIDUAL_NUM = 9;
 //#define EVALUATE evaluate_with_heuristic
 //#define EVALUATE evaluate_with_network
 
-#define AA RandomAgent
+//#define AA RandomAgent
 //#define AA HeuristicAgent
-//#define AA MCTSAgent
+#define AA MCTSAgent
 
-//#define BB RandomAgent
+#define BB RandomAgent
 //#define BB HeuristicAgent
-#define BB MCTSAgent
+//#define BB MCTSAgent
 
 const bool SINGLE_PLAY = false;
 
 const int TOTAL_GAME_NUM = 1000;
-const int TOTAL_GAME_PRINT = 2;
+const int TOTAL_GAME_PRINT = 5;
 
 //train
 const int SELF_PLAY_NUM = 2; //2000;
