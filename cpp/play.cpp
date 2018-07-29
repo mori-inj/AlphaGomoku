@@ -54,7 +54,7 @@ void play()
 
 		for(int i=0; i<TOTAL_GAME_NUM; i++) {
 			if(i % TOTAL_GAME_PRINT == 0) {
-				printf("%d  %d %d %d\n",i,x_count,o_count,draw_count);
+				printf("%8d  %7d %7d %7d %lf %lf %lf\n",i,x_count,o_count,draw_count,100*x_count/(double)i, 100*o_count/(double)i, 100*draw_count/(double)i);
 			}
 
 			AA AgentA;
@@ -90,6 +90,6 @@ void play()
 			AgentA.clear();
 			AgentB.clear();
 		}
-		printf("%d %d %d\n\n",x_count, o_count, draw_count);
+		printf("%7d %7d %7d %lf %lf %lf\n",x_count,o_count,draw_count,100*x_count/(double)TOTAL_GAME_NUM, 100*o_count/(double)TOTAL_GAME_NUM, 100*draw_count/(double)TOTAL_GAME_NUM);
 	}
 }
