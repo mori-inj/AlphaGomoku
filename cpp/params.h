@@ -55,6 +55,6 @@ const int BATCH_SIZE = 512;
 const int MINI_BATCH_SIZE = 32;
 
 const int GAME_NUM = 10000;
-const int GAME_PRINT = 10;
+const int GAME_PRINT = 1000;
 
 #endif

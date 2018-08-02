@@ -36,8 +36,10 @@ void train()
 		while((int)input_list.size() < 2*BATCH_SIZE) {
 			time_t t = time(0);
 			tm* now = localtime(&t);
-			printf("game:  %d  data:  %d  %d-%d-%d %d:%d:%d\n",game,(int)input_list.size(),\
-					now->tm_year + 1900,now->tm_mon + 1,now->tm_mday,now->tm_hour,now->tm_min,now->tm_sec);
+			if(game % GAME_PRINT == 0) {
+				printf("game:  %d  data:  %d  %d-%d-%d %d:%d:%d\n",game,(int)input_list.size(),\
+						now->tm_year + 1900,now->tm_mon + 1,now->tm_mday,now->tm_hour,now->tm_min,now->tm_sec);
+			}
 			game++;
 
 			MCTSAgent mcts_agent(MCTS_SIM_NUM);
