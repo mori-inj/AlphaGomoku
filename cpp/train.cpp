@@ -46,7 +46,6 @@ void train()
 			int turn_cnt = 0;
 			while(1) {
 				turn_cnt++;
-				printf("%d\n",turn_cnt);
 				
 				input_list.push_back(preproc_board(board_state.board, board_state.turn));
 				auto ret = mcts_agent.get_pi_and_play(board_state);
