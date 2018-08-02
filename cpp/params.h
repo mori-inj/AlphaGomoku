@@ -10,7 +10,7 @@ const double C_PUCT = 5;
 const double EPSILON = 0.1; //0.25;
 const double DIR_ALPHA = 0.3; //0.5;
 
-const int MCTS_SIM_NUM = 800;//128;
+const int MCTS_SIM_NUM = 128;//800;//128;
 const double TEMPER_EPS = 1e-1;
 const int TEMPER_THRS = 2;
 

@@ -1,6 +1,10 @@
+from params import *
 import tensorflow as tf
 import numpy as np
 import os
+
+
+shm = '' #'/dev/shm/'
 
 def ConvBlock(x):
     x = tf.layers.conv2d(x, 256, 3, strides=1, padding='same', name='conv')
@@ -88,16 +92,16 @@ class Network:
         else:
             self.saver.restore(self.sess,"./AlphaGomoku.ckpt")
 
-        f = open("/dev/shm/con_network_ready","w")
+        f = open(shm+"con_network_ready","w")
         f.close()
             
-        while os.path.isfile("/dev/shm/con_python_enable"):
-            if os.path.isfile("/dev/shm/con_network_input.txt"):
+        while os.path.isfile(shm+"con_python_enable"):
+            if os.path.isfile(shm+"con_network_input.txt"):
                 input_data = []
                 while len(input_data) == 0:
-                    with open("/dev/shm/con_network_input.txt") as f:
+                    with open(shm+"con_network_input.txt") as f:
                         input_data = f.readlines() 
-                os.system("rm /dev/shm/con_network_input.txt")
+                os.system("rm "+shm+"con_network_input.txt")
                 input_data = [x.strip() for x in input_data]
 
                 cnt = 0
@@ -118,7 +122,7 @@ class Network:
                 P,V = self.get_output(s)
                 P = np.reshape(P, [board_size, board_size])
                 
-                f = open("/dev/shm/con_network_output.txt_","w")
+                f = open(shm+"con_network_output.txt_","w")
                 for i in range(board_size):
                     s = ""
                     for j in range(board_size):
@@ -126,17 +130,17 @@ class Network:
                     f.write(s+"\n")
                 f.write(str(float(V))+"\n")
                 f.close()
-                os.system("mv /dev/shm/con_network_output.txt_ /dev/shm/con_network_output.txt")
+                os.system("mv "+shm+"con_network_output.txt_ "+shm+"con_network_output.txt")
 
-            if os.path.isfile("/dev/shm/con_train_data.txt"):
-                f = open("/dev/shm/con_network_training","w")
+            if os.path.isfile(shm+"con_train_data.txt"):
+                f = open(shm+"con_network_training","w")
                 f.close()
 
                 input_data = []
                 while len(input_data) == 0:
-                    with open("/dev/shm/con_train_data.txt") as f:
+                    with open(shm+"con_train_data.txt") as f:
                         input_data = f.readlines() 
-                os.system("rm /dev/shm/con_train_data.txt")
+                os.system("rm "+shm+"con_train_data.txt")
                 input_data = [x.strip() for x in input_data]
 
                 data_num = int(input_data[0].split(' ')[0])
@@ -181,7 +185,7 @@ class Network:
 
                 self.train(X, P, Z, iteration, print_iter)
 
-                os.system("rm /dev/shm/con_network_training")
+                os.system("rm "+shm+"con_network_training")
 
 
     def train(self, X_, pi_, Z_, it, prt_it):
