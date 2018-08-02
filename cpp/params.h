@@ -47,14 +47,14 @@ const int TOTAL_GAME_NUM = 20000;
 const int TOTAL_GAME_PRINT = 5;
 
 //train
-const int SELF_PLAY_NUM = 2; //2000;
+const int SELF_PLAY_NUM = 2000;
 const int TRAIN_ITER = 500;
 const int PRINT_ITER = 100;
 
-const int BATCH_SIZE = 20; //2048;
-const int MINI_BATCH_SIZE = 10; //32;
+const int BATCH_SIZE = 2048;
+const int MINI_BATCH_SIZE = 32;
 
-const int GAME_NUM = 10; //100;
-const int GAME_PRINT = 2; //5;
+const int GAME_NUM = 10000;
+const int GAME_PRINT = 10;
 
 #endif
