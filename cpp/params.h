@@ -48,10 +48,10 @@ const int TOTAL_GAME_PRINT = 5;
 
 //train
 const int SELF_PLAY_NUM = 2000;
-const int TRAIN_ITER = 500;
-const int PRINT_ITER = 100;
+const int TRAIN_ITER = 200;
+const int PRINT_ITER = 50;
 
-const int BATCH_SIZE = 2048;
+const int BATCH_SIZE = 512;
 const int MINI_BATCH_SIZE = 32;
 
 const int GAME_NUM = 10000;
