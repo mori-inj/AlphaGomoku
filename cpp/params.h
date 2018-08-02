@@ -2,8 +2,8 @@
 #define __PARAMS__
 
 //gomoku
-const int BOARD_SIZE = 9;
-const int N_IN_A_ROW = 5;
+const int BOARD_SIZE = 3;//9;
+const int N_IN_A_ROW = 3;//5;
 
 //mcts
 const double C_PUCT = 5;
