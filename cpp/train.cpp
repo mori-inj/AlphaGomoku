@@ -22,7 +22,7 @@ void train()
 {
 	srand((unsigned)time(NULL));
 
-	network = Network(BOARD_SIZE, 5, 9, true);
+	network = Network(BOARD_SIZE, INPUT_FRAME_NUM, RESIDUAL_NUM, true);
 
 	
 	for(int iteration=0; iteration<SELF_PLAY_NUM; iteration++) {
