@@ -23,7 +23,8 @@ for iteration in range(SELF_PLAY_NUM):
     
     game = 0
     while len(input_list) < 2*BATCH_SIZE:
-        print("game: ",game," data: ",len(input_list), datetime.datetime.fromtimestamp(time.time()).strftime('%Y-%m-%d %H:%M:%S'))
+        if game % GAME_PRINT == 0:
+            print("game: ",game," data: ",len(input_list), datetime.datetime.fromtimestamp(time.time()).strftime('%Y-%m-%d %H:%M:%S'))
         game += 1
 
         mcts = MCTS(BS, evaluate_with_network)
