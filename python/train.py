@@ -1,6 +1,5 @@
 from params import *
 from MCTS import *
-import tkinter as tk
 import time
 import datetime
 
@@ -104,7 +103,7 @@ for iteration in range(SELF_PLAY_NUM):
     
     network.train(input_, pi_, z_, TRAIN_ITER, PRINT_ITER) 
 
-   
+    """
     x_count = 0
     o_count = 0
     draw_count = 0
@@ -138,4 +137,4 @@ for iteration in range(SELF_PLAY_NUM):
     print(x_count, o_count, draw_count)
 
 
-
+    """

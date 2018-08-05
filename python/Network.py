@@ -1,6 +1,8 @@
 from params import *
 import tensorflow as tf
 import numpy as np
+import time
+import datetime
 
 def ConvBlock(x):
     x = tf.layers.conv2d(x, 256, 3, strides=1, padding='same', name='conv')
@@ -106,7 +108,10 @@ class Network:
                     print('loss: ' , l)
                     print('policy loss: ', pl)
                     print('value loss: ', vl)
-                    save_path = self.saver.save(self.sess,"./AlphaGomoku.ckpt")
+
+            ts = time.time()
+            st = datetime.datetime.fromtimestamp(ts).strftime('%Y-%m-%d_%H:%M:%S')
+            save_path = self.saver.save(self.sess,"./AlphaGomoku_"+st+".ckpt")
 
     def get_output(self, X_):
         return self.sess.run([self.P, self.V], feed_dict={self.X: X_})
