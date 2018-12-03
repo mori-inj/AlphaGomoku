@@ -18,7 +18,7 @@ total_pi_list = []
 total_z_list = []
 
 for iteration in range(SELF_PLAY_NUM):
-    if iteration % 100 == 0:
+    if iteration % 500 == 0:
         #"""
         x_count = 0
         o_count = 0
