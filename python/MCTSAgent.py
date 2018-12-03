@@ -3,7 +3,9 @@ from Gomoku import *
 from MCTS import *
 
 
-if EVALUATE == "random":
+if EVALUATE == "constant":
+    EVALUATE = evaluate_with_constant
+elif EVALUATE == "random":
     EVALUATE = evaluate_with_random
 elif EVALUATE == "heuristic":
     EVALUATE = evaluate_with_heuristic

@@ -3,7 +3,7 @@
 
 int main()
 {
-	//play();
-	train();
+	play();
+	//train();
 	return 0;
 }

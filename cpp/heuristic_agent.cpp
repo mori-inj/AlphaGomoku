@@ -169,10 +169,13 @@ pair<map<BoardState, double>, double> HeuristicAgent::evaluate(BoardState& board
 	}
 	
 	double v = 0;
-	if(idx != 0) v = (cnt_advtg / (double)idx)*2-1;
-	else if(is_game_ended(board_state.board)) v = 1;
-	else v = 0;
-
+	if(idx != 0) v = (cnt_advtg / (double)idx);//*2-1;
+	else if(is_game_ended(board_state.board)) {
+		v = (board_state.turn%2==1);
+	}
+	else v = 0.5;
+	v = 1-v;
+	
 	map<BoardState, double> p_dict;
 	for(auto& new_state : state_list) {
 		int r = new_state.last_row;

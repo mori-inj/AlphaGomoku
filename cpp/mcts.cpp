@@ -188,6 +188,34 @@ PV_pair evaluate_with_network(BoardState& state, vector<BoardState>& state_list)
 
 
 
+PV_pair evaluate_with_constant(BoardState& state, vector<BoardState>& state_list)
+{
+	double v;
+	if(is_game_ended(state.board)) {
+		v = (state.turn%2==1);
+	} else {
+		v = 0.5;
+	}
+	map<BoardState, double> p_dict;
+	double p_sum = 0;
+	int len = (int)state_list.size();
+	for(auto& new_state : state_list) {
+		int r = new_state.last_row;
+		int c = new_state.last_col;
+		double p = 1.0/len;
+		p_dict[new_state] = p;
+		p_sum += p;
+	}
+
+	for(auto& p : p_dict) {
+		p.second /= p_sum;
+	}
+
+	return make_pair(p_dict, v);
+}
+
+
+
 PV_pair evaluate_with_random(BoardState& state, vector<BoardState>& state_list)
 {
 	double v = (rand()%2000)/1000.0 - 1;
@@ -270,7 +298,7 @@ Node* Node::select()
 	if((int)child_list.size() == 0)
 		return max_child;
 
-	double QU_max = -DBL_MIN;
+	double QU_max = -1; // ALL QU will be non-negative
 	const double constant = C_PUCT * sqrt(N_sum);
 	vector<double> noise = Dirichlet(DIR_ALPHA, (int)child_list.size());
 	int idx = 0;
@@ -285,9 +313,18 @@ Node* Node::select()
 		double QU = child->Q + u;
 		if(QU_max < QU) {
 			QU_max = QU;
-			max_child = child;
 		}
 	}
+	
+	vector<Node*> max_child_list;
+	for(auto& child : child_list) {
+		if(child->Q + child->U == QU_max) {
+			max_child_list.push_back(child);
+		}
+	}
+	int rand_idx = rand() % (int)max_child_list.size();
+	max_child = max_child_list[rand_idx];
+
 	return max_child;
 }
 

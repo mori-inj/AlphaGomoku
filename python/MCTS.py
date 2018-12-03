@@ -87,7 +87,31 @@ def evaluate_with_network(state, state_list):
         r = new_state.last_row
         c = new_state.last_col
         p_dict[new_state] = p[r][c]
+
+    if is_game_ended(state.board):
+        v = 1
+
     return p_dict,v
+
+def evaluate_with_constant(state, state_list):
+    if is_game_ended(state.board):
+        v = state.turn%2==0 #1 when mcts starts first, 0 when mcts starts later
+    else:
+        v = 0.5
+    
+    p_dict = {}
+    p_sum = 0
+    for new_state in state_list:
+        r = new_state.last_row
+        c = new_state.last_col
+        p_dict[new_state] = 1
+        p_sum += 1
+
+    for p in p_dict:
+        p_dict[p] /= p_sum
+
+    return p_dict,v
+
 
 def evaluate_with_random(state, state_list):
     v = random.uniform(-1, 1)

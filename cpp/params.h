@@ -7,12 +7,12 @@ const int N_IN_A_ROW = 3;//5;
 
 //mcts
 const double C_PUCT = 5;
-const double EPSILON = 0.1; //0.25;
+const double EPSILON = 0;//0.1; //0.25;
 const double DIR_ALPHA = 0.3; //0.5;
 
-const int MCTS_SIM_NUM = 128;//800;//128;
-const double TEMPER_EPS = 1e-1;
-const int TEMPER_THRS = 2;
+const int MCTS_SIM_NUM = 128;//1600;//800;//128;
+const double TEMPER_EPS = 1;//1e-1;
+const int TEMPER_THRS = 1;//2;
 
 //network
 const int INPUT_FRAME_NUM = 5;
@@ -29,7 +29,8 @@ const int RESIDUAL_NUM = 9;
 #define A_NETWORK 13
 
 
-#define EVALUATE evaluate_with_random
+#define EVALUATE evaluate_with_constant
+//#define EVALUATE evaluate_with_random
 //#define EVALUATE evaluate_with_heuristic
 //#define EVALUATE evaluate_with_network
 
@@ -44,7 +45,7 @@ const int RESIDUAL_NUM = 9;
 const bool SINGLE_PLAY = false;
 
 const int TOTAL_GAME_NUM = 20000;
-const int TOTAL_GAME_PRINT = 5;
+const int TOTAL_GAME_PRINT = 200;
 
 //train
 const int SELF_PLAY_NUM = 2000;

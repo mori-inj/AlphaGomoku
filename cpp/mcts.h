@@ -15,6 +15,7 @@ vector<Board> preproc_board(Board& board, int turn);
 Board dihedral_reflection_rotation(int i, Board x);
 vector<vector<double> > dihedral_reflection_rotation(int i, vector<vector<double> > x);
 PV_pair evaluate_with_network(BoardState& state, vector<BoardState>& state_list);
+PV_pair evaluate_with_constant(BoardState& state, vector<BoardState>& state_list);
 PV_pair evaluate_with_random(BoardState& state, vector<BoardState>& state_list);
 PV_pair evaluate_with_heuristic(BoardState& state, vector<BoardState>& state_list);
 

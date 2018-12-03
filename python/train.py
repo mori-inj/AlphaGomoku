@@ -15,6 +15,80 @@ network = Network(board_size = BS, input_frame_num = INPUT_FRAME_NUM, residual_n
 
 
 for iteration in range(SELF_PLAY_NUM):
+    if iteration % 10 == 0:
+        #"""
+        x_count = 0
+        o_count = 0
+        draw_count = 0
+        AgentA = MCTSAg()
+        AgentB = RandomAg()
+
+        for i in range(GAME_NUM):
+            if i % GAME_PRINT == 0 and i!=0:
+                print(i, "  ", x_count, o_count, draw_count, "     ",x_count/i, o_count/i, draw_count/i)
+
+            gomoku = Gomoku(BOARD_SIZE, N_IN_A_ROW)
+            turn = 0
+            board_state = gomoku.board
+
+            while not gomoku.is_game_ended() and board_state.turn != BOARD_SIZE*BOARD_SIZE:
+                if board_state.turn % 2 == 0:
+                    board_state = AgentA.play(board_state)
+                else:
+                    board_state = AgentB.play(board_state)
+                gomoku.board = board_state
+                if gomoku.is_game_ended():
+                    if board_state.turn%2*2-1 == 1:
+                        x_count += 1
+                    else:
+                        o_count += 1
+                    break
+            else:
+                 draw_count += 1
+
+
+        print(x_count, o_count, draw_count)
+
+        x_count = 0
+        o_count = 0
+        draw_count = 0
+        AgentB = MCTSAg()
+        AgentA = RandomAg()
+
+        for i in range(GAME_NUM):
+            if i % GAME_PRINT == 0 and i!=0:
+                print(i, "  ", x_count, o_count, draw_count, "     ",x_count/i, o_count/i, draw_count/i)
+
+            gomoku = Gomoku(BOARD_SIZE, N_IN_A_ROW)
+            turn = 0
+            board_state = gomoku.board
+
+            while not gomoku.is_game_ended() and board_state.turn != BOARD_SIZE*BOARD_SIZE:
+                if board_state.turn % 2 == 0:
+                    board_state = AgentA.play(board_state)
+                else:
+                    board_state = AgentB.play(board_state)
+                gomoku.board = board_state
+                if gomoku.is_game_ended():
+                    if board_state.turn%2*2-1 == 1:
+                        x_count += 1
+                    else:
+                        o_count += 1
+                    break
+            else:
+                 draw_count += 1
+
+
+        print(x_count, o_count, draw_count)
+
+
+
+        #""" 
+
+
+
+
+
     print("======================= iter: " + str(iteration) + " ===========================")
     
     input_list = []
@@ -70,7 +144,7 @@ for iteration in range(SELF_PLAY_NUM):
                 pi_list.append(pi)
                 nst = int(next_state.turn + 1)
                 for i in range(nst):
-                    if i %2*2-1 == next_state.turn%2*2-1:
+                    if i%2*2-1 == next_state.turn%2*2-1:
                         z_list.append([1])
                     else:
                         z_list.append([-1])
@@ -104,38 +178,4 @@ for iteration in range(SELF_PLAY_NUM):
     
     network.train(input_, pi_, z_, TRAIN_ITER, PRINT_ITER) 
 
-    """
-    x_count = 0
-    o_count = 0
-    draw_count = 0
-    AgentA = RandomAg()
-    AgentB = MCTSAg()
-
-    for i in range(GAME_NUM):
-        if i % GAME_PRINT == 0:
-            print(i, "  ", x_count, o_count, draw_count)
-
-        gomoku = Gomoku(BOARD_SIZE, N_IN_A_ROW)
-        turn = 0
-        board_state = gomoku.board
-
-        while not gomoku.is_game_ended() and board_state.turn != BOARD_SIZE*BOARD_SIZE:
-            if board_state.turn % 2 == 0:
-                board_state = AgentA.play(board_state)
-            else:
-                board_state = AgentB.play(board_state)
-            gomoku.board = board_state
-            if gomoku.is_game_ended():
-                if board_state.turn%2*2-1 == 1:
-                    x_count += 1
-                else:
-                    o_count += 1
-                break
-        else:
-             draw_count += 1
-
-
-    print(x_count, o_count, draw_count)
-
-
-    """
+    

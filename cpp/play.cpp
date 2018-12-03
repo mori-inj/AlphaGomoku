@@ -20,6 +20,7 @@ void play()
 		bool draw_flag = true;
 		Gomoku gomoku(BOARD_SIZE, N_IN_A_ROW);
 		int turn = 0;
+
 		BoardState board_state = gomoku.board;
 
 		while(!gomoku.is_game_ended() && board_state.turn != BOARD_SIZE*BOARD_SIZE) {
@@ -60,10 +61,10 @@ void play()
 				printf("%8d  %7d %7d %7d %lf %lf %lf\n",i,mcts_count,random_count,draw_count,100*mcts_count/(double)i, 100*random_count/(double)i, 100*draw_count/(double)i);
 			}
 
-			int mcts_first = rand()%2;
+			int mcts_first = 1;//rand()%2;
 			if(mcts_first) {
-				MCTSAgent AgentA;
-				RandomAgent AgentB;
+				AA AgentA;
+				BB AgentB;
 
 				Gomoku gomoku(BOARD_SIZE, N_IN_A_ROW);
 				int turn = 0;
@@ -97,8 +98,8 @@ void play()
 				AgentA.clear();
 				AgentB.clear();
 			} else {
-				RandomAgent AgentA;
-				MCTSAgent AgentB;
+				BB AgentA;
+				AA AgentB;
 
 				Gomoku gomoku(BOARD_SIZE, N_IN_A_ROW);
 				int turn = 0;
