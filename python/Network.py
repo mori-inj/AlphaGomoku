@@ -4,18 +4,20 @@ import numpy as np
 import time
 import datetime
 
+channel = 128
+
 def ConvBlock(x):
-    x = tf.layers.conv2d(x, 256, 3, strides=1, padding='same', name='conv')
+    x = tf.layers.conv2d(x, channel, 3, strides=1, padding='same', name='conv')
     x = tf.layers.batch_normalization(x)
     x = tf.nn.relu(x)
     return x
 
 def ResidualBlock(h):
     with tf.variable_scope('res'):
-        x = tf.layers.conv2d(h, 256, 3, strides=1, padding='same', name='conv1')
+        x = tf.layers.conv2d(h, channel, 3, strides=1, padding='same', name='conv1')
         x = tf.layers.batch_normalization(x, name='bn1')
         x = tf.nn.relu(x)
-        x = tf.layers.conv2d(x, 256, 3, strides=1, padding='same', name='conv2')
+        x = tf.layers.conv2d(x, channel, 3, strides=1, padding='same', name='conv2')
         x = tf.layers.batch_normalization(x, name='bn2')
         x = x + h
         x = tf.nn.relu(x)
@@ -39,7 +41,7 @@ def ValueOutputBlock(x, board_size):
         x = tf.layers.batch_normalization(x)
         
         x = tf.nn.relu(x)
-        x = tf.layers.dense(x, 256, name='fc1')
+        x = tf.layers.dense(x, channel, name='fc1')
         x = tf.nn.relu(x)
         x = tf.layers.dense(x, 1, name='fc2')
         x = tf.nn.tanh(x)
@@ -75,8 +77,8 @@ class Network:
             #self.policy_loss = tf.reduce_mean(tf.nn.sigmoid_cross_entropy_with_logits(labels=self.pi, logits=self.P))
             self.loss = self.value_loss + self.policy_loss + theta
             
-            learning_rate = 0.001 #0.01 # TODO apply learning step anneling
-            optimizer = tf.train.MomentumOptimizer(learning_rate, 0.9)
+            learning_rate = 1e-4 #0.01 # TODO apply learning step anneling
+            optimizer = tf.train.AdamOptimizer(learning_rate, 0.9)
             self.train_model = optimizer.minimize(self.loss)
             self.init = tf.global_variables_initializer()
             
@@ -90,24 +92,19 @@ class Network:
         else:
             self.saver.restore(self.sess,"./AlphaGomoku.ckpt")
 
-    def train(self, X_, pi_, Z_, it, prt_it):
+    def train(self, X_, pi_, Z_, TOTAL_BATCH_SIZE):
         if self.is_trainable:
-            for i in range(it): # TODO should change # of iteration steps
-                for batch in range(BATCH_SIZE//MINI_BATCH_SIZE):
-                    fd = {
-                            self.X: X_[batch*MINI_BATCH_SIZE:(batch+1)*MINI_BATCH_SIZE],
-                            self.pi: pi_[batch*MINI_BATCH_SIZE:(batch+1)*MINI_BATCH_SIZE],
-                            self.Z: Z_[batch*MINI_BATCH_SIZE:(batch+1)*MINI_BATCH_SIZE]
-                    }
-                    self.sess.run(self.train_model, feed_dict=fd)
+            for batch in range(TOTAL_BATCH_SIZE//BATCH_SIZE):
+                fd = {
+                    self.X: X_[batch*BATCH_SIZE:(batch+1)*BATCH_SIZE],
+                    self.pi: pi_[batch*BATCH_SIZE:(batch+1)*BATCH_SIZE],
+                    self.Z: Z_[batch*BATCH_SIZE:(batch+1)*BATCH_SIZE]
+                }
+                self.sess.run(self.train_model, feed_dict=fd)
 
                 fd = {self.X: X_, self.pi: pi_, self.Z: Z_}
-                if i % prt_it == 0:
-                    print('======= ' + str(i) + ' =======')
-                    l, pl, vl = self.sess.run([self.loss, self.policy_loss, self.value_loss], feed_dict=fd)
-                    print('loss: ' , l)
-                    print('policy loss: ', pl)
-                    print('value loss: ', vl)
+                l, pl, vl = self.sess.run([self.loss, self.policy_loss, self.value_loss], feed_dict=fd)
+                print('batch: ', batch, ' loss: ' , l, ' policy loss: ', pl, ' value loss: ', vl)
 
             ts = time.time()
             st = datetime.datetime.fromtimestamp(ts).strftime('%Y-%m-%d_%H:%M:%S')

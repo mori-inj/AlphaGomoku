@@ -13,9 +13,12 @@ from MCTSAgent import MCTSAgent as MCTSAg
 #ignore original network in MCTS.py and overwrite it with trainable network
 network = Network(board_size = BS, input_frame_num = INPUT_FRAME_NUM, residual_num = RESIDUAL_NUM, is_trainable=True)
 
+total_input_list = []
+total_pi_list = []
+total_z_list = []
 
 for iteration in range(SELF_PLAY_NUM):
-    if iteration % 10 == 0:
+    if iteration % 100 == 0:
         #"""
         x_count = 0
         o_count = 0
@@ -95,11 +98,15 @@ for iteration in range(SELF_PLAY_NUM):
     pi_list = []
     z_list = []
     
-    game = 0
-    while len(input_list) < 2*BATCH_SIZE:
-        if game % GAME_PRINT == 0:
-            print("game: ",game," data: ",len(input_list), datetime.datetime.fromtimestamp(time.time()).strftime('%Y-%m-%d %H:%M:%S'))
-        game += 1
+    if iteration == 0:
+        game_iter = INIT_GAME_NUM
+    else:
+        game_iter = 1
+
+    x_count = 0
+    o_count = 0
+    draw_count = 0
+    for game in range(game_iter):
 
         mcts = MCTS(BS, evaluate_with_network)
         node = mcts.root
@@ -107,7 +114,7 @@ for iteration in range(SELF_PLAY_NUM):
         turn_cnt = 0
         while True:
             turn_cnt += 1
-            if turn_cnt <= 2:
+            if turn_cnt < TEMPER_THRES:
                 TEMPERATURE = 1
             else:
                 TEMPERATURE = TEMPER_EPS
@@ -133,6 +140,7 @@ for iteration in range(SELF_PLAY_NUM):
             #r = next_state.last_row
             #c = next_state.last_col
 
+            
             if is_game_ended(next_board):
                 input_board = preproc_board(next_board, next_state.turn)
                 input_list.append(input_board[0])
@@ -148,6 +156,18 @@ for iteration in range(SELF_PLAY_NUM):
                         z_list.append([1])
                     else:
                         z_list.append([-1])
+            
+                if next_state.turn%2*2-1 == 1:
+                    winner = 'x'
+                    x_count += 1
+                else:
+                    winner = 'o'
+                    o_count += 1
+                print(next_state)
+                print("game: ",game," data: ",len(input_list), \
+                        '| winner:', winner, '| x: ', x_count, '| o: ', o_count, '| draw: ', draw_count, '|', \
+                        x_count / (game+1), o_count / (game+1), draw_count / (game+1),
+                        datetime.datetime.fromtimestamp(time.time()).strftime('%Y-%m-%d %H:%M:%S'))
                 break
             elif next_state.turn == BS*BS:
                 input_board = preproc_board(next_board, next_state.turn)
@@ -162,20 +182,35 @@ for iteration in range(SELF_PLAY_NUM):
                 nst = next_state.turn + 1
                 for _ in range(nst):
                     z_list.append([0])
+            
+                winner = 'draw'
+                draw_count += 1
+                print(next_state)
+                print("game: ",game," data: ",len(input_list), \
+                        '| winner:', winner, '| x: ', x_count, '| o: ', o_count, '| draw: ', draw_count, '|', \
+                        x_count / (game+1), o_count / (game+1), draw_count / (game+1),
+                        datetime.datetime.fromtimestamp(time.time()).strftime('%Y-%m-%d %H:%M:%S'))
                 break
 
+    if iteration == 0:
+        total_input_list = input_list
+        total_pi_list = pi_list
+        total_z_list = z_list
+    else:
+        total_input_list = input_list + total_input_list[len(input_list):]
+        total_pi_list = pi_list + total_pi_list[len(pi_list):]
+        total_z_list = z_list + total_z_list[len(z_list):]
 
     
+    combined = list(zip(total_input_list, total_pi_list, total_z_list))
+    random.shuffle(combined)
+    total_input_list[:], total_pi_list[:], total_z_list[:] = zip(*combined)
 
-    index = list(range(len(input_list)))
-    random.shuffle(index)
-    print('data size: ', len(index))
-    index = index[:BATCH_SIZE]
-    input_ = np.asarray([input_list[idx] for idx in index])
-    pi_ = np.asarray([pi_list[idx] for idx in index])
-    z_ = np.asarray([z_list[idx] for idx in index])
+    input_ = np.asarray(total_input_list[:BATCH_SIZE*len(input_list)])
+    pi_ = np.asarray(total_pi_list[:BATCH_SIZE*len(pi_list)])
+    z_ = np.asarray(total_z_list[:BATCH_SIZE*len(z_list)])
     
     
-    network.train(input_, pi_, z_, TRAIN_ITER, PRINT_ITER) 
+    network.train(input_, pi_, z_, min(len(total_input_list), BATCH_SIZE*len(input_list)))
 
     

@@ -204,7 +204,7 @@ class Node:
         child.W+= v
         child.Q = child.W / child.N
         if self.parent != None:
-            self.parent.backup(v, self)
+            self.parent.backup(-v, self)
     
     def get_pi(self, t):
         pi = {}
