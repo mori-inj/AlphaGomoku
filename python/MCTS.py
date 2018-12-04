@@ -51,9 +51,11 @@ def preproc_board(board, turn):
         s[-1] = np.zeros([BS, BS]) 
     else:
         s[-1] = np.ones([BS, BS]) 
+
     
     s = np.asarray([s])
     s = np.transpose(s, [0, 2, 3, 1])
+
     return s
 
 def dihedral_reflection_rotation(i, x):
@@ -209,12 +211,25 @@ class Node:
     def get_pi(self, t):
         pi = {}
         N_s = 1e-9
-        for n in self.child_list:
-            pi[n] = n.N ** (1/t)
-            N_s += pi[n]
-        
-        for n in pi:
-            pi[n] /= N_s
+        if t == 0:
+            max_n = 0
+            for n in self.child_list:
+                if max_n < n.N:
+                    max_n = n.N
+                    max_child = n
+            for n in self.child_list:
+                if n == max_child:
+                    pi[n] = 1
+                else:
+                    pi[n] = 0
+            N_s = 1
+        else:
+            for n in self.child_list:
+                pi[n] = n.N ** (1/t)
+                N_s += pi[n]
+            
+            for n in pi:
+                pi[n] /= N_s
 
         return pi, N_s
 

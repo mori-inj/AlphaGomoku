@@ -92,23 +92,25 @@ class Network:
         else:
             self.saver.restore(self.sess,"./AlphaGomoku.ckpt")
 
-    def train(self, X_, pi_, Z_, TOTAL_BATCH_SIZE):
+    def train(self, X_, pi_, Z_, TOTAL_EPOCH, TOTAL_BATCH_SIZE, it):
         if self.is_trainable:
-            for batch in range(TOTAL_BATCH_SIZE//BATCH_SIZE):
-                fd = {
-                    self.X: X_[batch*BATCH_SIZE:(batch+1)*BATCH_SIZE],
-                    self.pi: pi_[batch*BATCH_SIZE:(batch+1)*BATCH_SIZE],
-                    self.Z: Z_[batch*BATCH_SIZE:(batch+1)*BATCH_SIZE]
-                }
-                self.sess.run(self.train_model, feed_dict=fd)
+            for epoch in range(TOTAL_EPOCH):
+                for batch in range(TOTAL_BATCH_SIZE//BATCH_SIZE):
+                    fd = {
+                        self.X: X_[batch*BATCH_SIZE:(batch+1)*BATCH_SIZE],
+                        self.pi: pi_[batch*BATCH_SIZE:(batch+1)*BATCH_SIZE],
+                        self.Z: Z_[batch*BATCH_SIZE:(batch+1)*BATCH_SIZE]
+                    }
+                    self.sess.run(self.train_model, feed_dict=fd)
 
                 fd = {self.X: X_, self.pi: pi_, self.Z: Z_}
                 l, pl, vl = self.sess.run([self.loss, self.policy_loss, self.value_loss], feed_dict=fd)
-                print('batch: ', batch, ' loss: ' , l, ' policy loss: ', pl, ' value loss: ', vl)
+                print('epoch: ', epoch, 'batch: ', batch, ' loss: ' , l, ' policy loss: ', pl, ' value loss: ', vl)
 
-            ts = time.time()
-            st = datetime.datetime.fromtimestamp(ts).strftime('%Y-%m-%d_%H:%M:%S')
-            save_path = self.saver.save(self.sess,"./AlphaGomoku_"+st+".ckpt")
+            if it % 10 == 0:
+                ts = time.time()
+                st = datetime.datetime.fromtimestamp(ts).strftime('%Y-%m-%d_%H:%M:%S')
+                save_path = self.saver.save(self.sess,"./AlphaGomoku_"+st+".ckpt")
 
     def get_output(self, X_):
         return self.sess.run([self.P, self.V], feed_dict={self.X: X_})

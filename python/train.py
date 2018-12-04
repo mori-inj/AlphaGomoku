@@ -18,7 +18,7 @@ total_pi_list = []
 total_z_list = []
 
 for iteration in range(SELF_PLAY_NUM):
-    if iteration % 500 == 0:
+    if iteration % 300 == 0:
         #"""
         x_count = 0
         o_count = 0
@@ -211,6 +211,6 @@ for iteration in range(SELF_PLAY_NUM):
     z_ = np.asarray(total_z_list[:BATCH_SIZE*len(z_list)])
     
     
-    network.train(input_, pi_, z_, min(len(total_input_list), BATCH_SIZE*len(input_list)))
+    network.train(input_, pi_, z_, EPOCH, min(len(total_input_list), BATCH_SIZE*len(input_list)), iteration)
 
     
