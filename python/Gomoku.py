@@ -2,42 +2,76 @@ from params import *
 import numpy as np
 
 def is_game_ended(board):
-    turn = np.amax(board) 
-
-    if turn==0:
-        return False
+    turn = 0
     for i in range(BOARD_SIZE):
         for j in range(BOARD_SIZE):
-            if board[i][j] == turn:
+            if turn < board[i][j]:
+                turn = board[i][j]
                 row = i
                 col = j
+    if turn==0:
+        return False
+    player = turn%2
+
+
+    if N_IN_A_ROW == BOARD_SIZE:
+        for i in range(BOARD_SIZE):
+            if board[row][i] == 0:
+                break
+            if board[row][i]%2 != player:
                 break
         else:
-            continue
-        break
+            return True
+        
+        for i in range(BOARD_SIZE):
+            if board[i][col] == 0:
+                break
+            if board[i][col]%2 != player:
+                break
+        else:
+            return True
 
-    dx = [1, 1, 0, -1, -1, -1, 0, 1]
-    dy = [0, -1, -1, -1, 0, 1, 1, 1]
-    nx = col
-    ny = row
-    player = board[row][col]%2*2-1
-
-    for key in range(8):
-        for i in range(N_IN_A_ROW):
-            nx = col - i*dx[key]
-            ny = row - i*dy[key]
-            for j in range(N_IN_A_ROW):
-                if not (0 <= nx and nx < BOARD_SIZE and 0 <= ny and ny < BOARD_SIZE):
+        if row == col:
+            for i in range(BOARD_SIZE):
+                if board[i][i] == 0:
                     break
-                if board[ny][nx]>0 and board[ny][nx]%2*2-1 != player:
+                if board[i][i]%2 != player:
                     break
-                if board[ny][nx] == 0:
-                    break
-                nx = nx + dx[key]
-                ny = ny + dy[key]
             else:
                 return True
-    return False
+
+        if row+col == BOARD_SIZE-1:
+            for i in range(BOARD_SIZE):
+                if board[i][BOARD_SIZE-1-i] == 0:
+                    break
+                if board[i][BOARD_SIZE-1-i]%2 != player:
+                    break
+            else:
+                return True
+
+        return False
+    else:
+        dx = [1, 1, 0, -1, -1, -1, 0, 1]
+        dy = [0, -1, -1, -1, 0, 1, 1, 1]
+        nx = col
+        ny = row
+
+        for key in range(8):
+            for i in range(N_IN_A_ROW):
+                nx = col - i*dx[key]
+                ny = row - i*dy[key]
+                for j in range(N_IN_A_ROW):
+                    if not (0 <= nx and nx < BOARD_SIZE and 0 <= ny and ny < BOARD_SIZE):
+                        break
+                    if board[ny][nx]>0 and board[ny][nx]%2 != player:
+                        break
+                    if board[ny][nx] == 0:
+                        break
+                    nx = nx + dx[key]
+                    ny = ny + dy[key]
+                else:
+                    return True
+        return False
 
 
 

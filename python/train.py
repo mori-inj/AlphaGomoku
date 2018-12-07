@@ -18,7 +18,7 @@ total_pi_list = []
 total_z_list = []
 
 for iteration in range(SELF_PLAY_NUM):
-    if iteration % 300 == 0:
+    if iteration % 10 == 0 and iteration > 0:
         #"""
         x_count = 0
         o_count = 0
@@ -101,7 +101,7 @@ for iteration in range(SELF_PLAY_NUM):
     if iteration == 0:
         game_iter = INIT_GAME_NUM
     else:
-        game_iter = 1
+        game_iter = EPOCH_GAME_NUM
 
     x_count = 0
     o_count = 0
@@ -163,7 +163,7 @@ for iteration in range(SELF_PLAY_NUM):
                 else:
                     winner = 'o'
                     o_count += 1
-                print(next_state)
+                # print(next_state)
                 print("game: ",game," data: ",len(input_list), \
                         '| winner:', winner, '| x: ', x_count, '| o: ', o_count, '| draw: ', draw_count, '|', \
                         x_count / (game+1), o_count / (game+1), draw_count / (game+1),
@@ -185,7 +185,7 @@ for iteration in range(SELF_PLAY_NUM):
             
                 winner = 'draw'
                 draw_count += 1
-                print(next_state)
+                #print(next_state)
                 print("game: ",game," data: ",len(input_list), \
                         '| winner:', winner, '| x: ', x_count, '| o: ', o_count, '| draw: ', draw_count, '|', \
                         x_count / (game+1), o_count / (game+1), draw_count / (game+1),

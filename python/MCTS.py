@@ -27,35 +27,25 @@ def get_next_states(state):
 
 def preproc_board(board, turn):
     frame = INPUT_FRAME_NUM
+    turn_parity = turn % 2
+    half_frame = (frame-1)//2
     
-    s = [0] * frame
-    for fn in range((frame-1)//2):
-        f = np.zeros([BS, BS])
-        for i in range(BS):
-            for j in range(BS):
-                if board[i][j] > 0 and board[i][j] % 2 == turn % 2 and \
-                    board[i][j] <= turn - fn*2:
-                    f[i][j] = 1
-        s[fn] = f
+    s = np.zeros([1, BS, BS, frame])
+    for i in range(BS):
+        for j in range(BS):
+            if 0 == board[i][j]:
+                continue
+            for fn in range(half_frame):
+                limit = turn - fn*2
+                if board[i][j] <= limit:
+                    if board[i][j] % 2 == turn_parity:
+                        s[0][i][j][fn] = 1
+                    else:
+                        s[0][i][j][fn+half_frame] = 1
+        
+    if turn_parity == 1:
+        s[0,:,:,-1] = np.ones([BS, BS]) 
     
-    for fn in range((frame-1)//2):
-        f = np.zeros([BS, BS])
-        for i in range(BS):
-            for j in range(BS):
-                if board[i][j] > 0 and board[i][j] % 2 != turn % 2 and \
-                    board[i][j] <= turn - fn*2:
-                    f[i][j] = 1
-        s[fn + (frame-1)//2] = f
-
-    if turn % 2 == 0:
-        s[-1] = np.zeros([BS, BS]) 
-    else:
-        s[-1] = np.ones([BS, BS]) 
-
-    
-    s = np.asarray([s])
-    s = np.transpose(s, [0, 2, 3, 1])
-
     return s
 
 def dihedral_reflection_rotation(i, x):
@@ -159,30 +149,29 @@ class Node:
             max_child.search()
     
     def select(self):
-        max_child = self
         N_sum = self.N_sum
+        COMP_EPSILON = 1-EPSILON
+        child_list = self.child_list
+        child_num = len(child_list)
         
-        if len(self.child_list) == 0:
-            return max_child
+        if child_num == 0:
+            return self
 
-        QU_max = -float('Inf')
-        const = C_PUCT * math.sqrt(N_sum)
-        noise = np.random.dirichlet([DIR_ALPHA] * len(self.child_list))
-        idx = 0
-        for child in self.child_list:
-            if self.parent == None: # node is root
-                P = (1-EPSILON)*child.P + EPSILON*noise[idx]
-                idx += 1
-            else:
-                P = child.P
-            U = P * const / (1 + child.N)
-            child.U = U
-            QU = child.Q + U
-            if QU_max < QU:
-                QU_max = QU
-                max_child = child
+        const = C_PUCT * (N_sum**0.5)
         
-        return max_child
+        if self.parent == None:
+            noise = np.random.dirichlet([DIR_ALPHA] * child_num)
+            idx = 0
+            for child in child_list:
+                P = COMP_EPSILON*child.P + EPSILON*noise[idx]
+                idx += 1
+                
+                child.U = P * const / (1 + child.N)
+        else:
+            for child in child_list:
+                child.U = child.P * const / (1 + child.N)
+
+        return max(child_list, key=lambda x: x.Q + x.U)
 
     def expand(self):
         if is_game_ended(self.state.board): # FIXME Gomoku specific
