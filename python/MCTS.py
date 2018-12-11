@@ -171,7 +171,15 @@ class Node:
             for child in child_list:
                 child.U = child.P * const / (1 + child.N)
 
-        return max(child_list, key=lambda x: x.Q + x.U)
+        max_child = max(child_list, key=lambda x: x.Q + x.U)
+
+        max_QU = max_child.Q + max_child.U
+        candidates = []
+        for child in child_list:
+            if child.Q + child.U == max_QU:
+                candidates.append(child)
+        
+        return random.choice(candidates)
 
     def expand(self):
         if is_game_ended(self.state.board): # FIXME Gomoku specific

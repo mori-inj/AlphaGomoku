@@ -11,7 +11,7 @@ from MCTSAgent import MCTSAgent as MCTSAg
 
 
 #ignore original network in MCTS.py and overwrite it with trainable network
-network = Network(board_size = BS, input_frame_num = INPUT_FRAME_NUM, residual_num = RESIDUAL_NUM, is_trainable=True)
+#network = Network(board_size = BS, input_frame_num = INPUT_FRAME_NUM, residual_num = RESIDUAL_NUM, is_trainable=True)
 
 total_input_list = []
 total_pi_list = []
