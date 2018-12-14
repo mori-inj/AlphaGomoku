@@ -18,7 +18,7 @@ total_pi_list = []
 total_z_list = []
 
 for iteration in range(SELF_PLAY_NUM):
-    if iteration % 10 == 0 and iteration > 0:
+    if iteration % 50 == 0:
         #"""
         x_count = 0
         o_count = 0
@@ -192,14 +192,14 @@ for iteration in range(SELF_PLAY_NUM):
                         datetime.datetime.fromtimestamp(time.time()).strftime('%Y-%m-%d %H:%M:%S'))
                 break
 
-    if iteration == 0:
-        total_input_list = input_list
-        total_pi_list = pi_list
-        total_z_list = z_list
-    else:
-        total_input_list = input_list + total_input_list[len(input_list):]
-        total_pi_list = pi_list + total_pi_list[len(pi_list):]
-        total_z_list = z_list + total_z_list[len(z_list):]
+    #if iteration == 0:
+    total_input_list = input_list
+    total_pi_list = pi_list
+    total_z_list = z_list
+    #else:
+    #    total_input_list = input_list + total_input_list[len(input_list):]
+    #    total_pi_list = pi_list + total_pi_list[len(pi_list):]
+    #    total_z_list = z_list + total_z_list[len(z_list):]
 
     
     combined = list(zip(total_input_list, total_pi_list, total_z_list))

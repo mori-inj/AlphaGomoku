@@ -1,2 +1,3 @@
-model_checkpoint_path: "AlphaGomoku_2018-12-08_20:48:09.ckpt"
-all_model_checkpoint_paths: "AlphaGomoku_2018-12-08_20:48:09.ckpt"
+model_checkpoint_path: "AlphaGomoku_2018-12-14_13:35:39.ckpt"
+all_model_checkpoint_paths: "AlphaGomoku_2018-12-14_12:57:19.ckpt"
+all_model_checkpoint_paths: "AlphaGomoku_2018-12-14_13:35:39.ckpt"

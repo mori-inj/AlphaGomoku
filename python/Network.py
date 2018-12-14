@@ -71,14 +71,14 @@ class Network:
            
 
             var = tf.trainable_variables()
-            theta = tf.reduce_mean(tf.add_n([tf.nn.l2_loss(v) for v in var]) )*1e-4
+            theta = tf.add_n([tf.nn.l2_loss(v) for v in var])*1e-4
             self.value_loss = tf.reduce_mean((self.Z - self.V)**2)
-            self.policy_loss = tf.reduce_mean( - tf.reduce_sum( tf.multiply(self.pi, tf.log(tf.maximum(self.P,1e-7))), 1, keep_dims=True))
+            self.policy_loss = tf.reduce_mean( - tf.reduce_mean( self.pi * tf.log(tf.maximum(self.P,1e-7)) ) )
             #self.policy_loss = tf.reduce_mean(tf.nn.sigmoid_cross_entropy_with_logits(labels=self.pi, logits=self.P))
             self.loss = self.value_loss + self.policy_loss + theta
             
-            learning_rate = 2e-5 #0.01 # TODO apply learning step anneling
-            optimizer = tf.train.AdamOptimizer(learning_rate, 0.9)
+            learning_rate = 0.00001 # TODO apply learning step anneling
+            optimizer = tf.train.AdamOptimizer(learning_rate)
             self.train_model = optimizer.minimize(self.loss)
             self.init = tf.global_variables_initializer()
             
