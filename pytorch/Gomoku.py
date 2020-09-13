@@ -1,5 +1,6 @@
 from params import *
-import numpy as np
+#import numpy as np
+import torch
 
 def is_game_ended(board):
     turn = 0
@@ -81,7 +82,7 @@ def is_game_ended(board):
 class BoardState:
     def __init__(self, board_size, turn, last_row = -1, last_col = -1):
         self.board_size = board_size
-        self.board = np.zeros([board_size, board_size]).tolist()
+        self.board = torch.zeros([board_size, board_size]).cuda()
         self.turn = turn
         self.last_row = last_row
         self.last_col = last_col

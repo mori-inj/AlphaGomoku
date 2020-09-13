@@ -4,12 +4,13 @@ from Network import Network
 from HeuristicAgent import HeuristicAgent
 import random
 import math
+from torch.distributions.dirichlet import Dirichlet
 
 BS = BOARD_SIZE
 
 heuristic = HeuristicAgent()
 
-network = Network(board_size = BS, input_frame_num = INPUT_FRAME_NUM, residual_num = RESIDUAL_NUM, is_trainable=True) #False
+network = Network(board_size=BS, input_frame_num=INPUT_FRAME_NUM, residual_num=RESIDUAL_NUM, is_trainable=True).cuda() #False
 # input_frame_num = 5 means, past 2 mover per each player + 1
 
 def get_next_states(state):
@@ -20,7 +21,7 @@ def get_next_states(state):
         for j in range(BS):
             if state[i][j] == 0:
                 new_state = BoardState(state.board_size, turn, i, j)
-                new_state.board = np.copy(state.board)
+                new_state.board = state.board.clone()
                 new_state[i][j] = turn
                 sl.append(new_state)
     return sl
@@ -30,7 +31,7 @@ def preproc_board(board, turn):
     turn_parity = turn % 2
     half_frame = (frame-1)//2
     
-    s = np.zeros([1, BS, BS, frame])
+    s = torch.zeros([1, frame, BS, BS]).cuda()
     for i in range(BS):
         for j in range(BS):
             if 0 == board[i][j]:
@@ -39,40 +40,40 @@ def preproc_board(board, turn):
                 limit = turn - fn*2
                 if board[i][j] <= limit:
                     if board[i][j] % 2 == turn_parity:
-                        s[0][i][j][fn] = 1
+                        s[0][fn][i][j]= 1
                     else:
-                        s[0][i][j][fn+half_frame] = 1
+                        s[0][fn+half_frame][i][j] = 1
         
     if turn_parity == 1:
-        s[0,:,:,-1] = np.ones([BS, BS]) 
+        s[0,-1,:,:] = torch.ones([BS, BS]).cuda() 
     
     return s
 
 def dihedral_reflection_rotation(i, x):
     if i > 0:
         if i > 4:
-            x = np.fliplr(x)
+            x = torch.fliplr(x)
             i -= 4
         for _ in range(i):
-            x = np.rot90(x)
+            x = torch.rot90(x)
     elif i < 0:
         ii = -i
         if ii > 4:
             ii -= 4
         for _ in range(4 - ii):
-            x = np.rot90(x)
+            x = torch.rot90(x)
 
         if i < -4:
-            x = np.fliplr(x)
+            x = torch.fliplr(x)
     return x
 
 def evaluate_with_network(state, state_list):
     i = random.randrange(1, 9)
-    board = dihedral_reflection_rotation(i, np.asarray(state.board))
+    board = dihedral_reflection_rotation(i, state.board)
     turn = state.turn
     s = preproc_board(board, turn)
     p,v = network.get_output(s)
-    p = np.reshape(p, (BS, BS))
+    p = p.reshape(BS, BS)
     p = dihedral_reflection_rotation(-i, p)
     p_dict = {}
     for new_state in state_list:
@@ -89,7 +90,7 @@ def evaluate_with_constant(state, state_list):
     if is_game_ended(state.board):
         v = state.turn%2==0 #1 when mcts starts first, 0 when mcts starts later
     else:
-        v = 0.5
+        v = 0 #0.5
     
     p_dict = {}
     p_sum = 0
@@ -106,7 +107,12 @@ def evaluate_with_constant(state, state_list):
 
 
 def evaluate_with_random(state, state_list):
-    v = random.uniform(-1, 1)
+    #v = 0 #random.uniform(-1, 1)
+    if is_game_ended(state.board):
+        v = state.turn%2==0 #1 when mcts starts first, 0 when mcts starts later
+    else:
+        v = 0 #0.5
+
     p_dict = {}
     p_sum = 0
     for new_state in state_list:
@@ -160,7 +166,8 @@ class Node:
         const = C_PUCT * (N_sum**0.5)
         
         if self.parent == None:
-            noise = np.random.dirichlet([DIR_ALPHA] * child_num)
+            dirichlet = Dirichlet(torch.tensor([DIR_ALPHA] * child_num).cuda())
+            noise = dirichlet.sample()
             idx = 0
             for child in child_list:
                 P = COMP_EPSILON*child.P + EPSILON*noise[idx]
@@ -237,7 +244,7 @@ class Node:
             N_list.append([pi[n],n])
         for i in range(1, len(N_list)):
             N_list[i][0] += N_list[i-1][0]
-        r = np.random.uniform(0, 1)
+        r = torch.rand(1)
         for i in range(len(N_list)):
             if N_list[i][0] >= r:
                 return N_list[i][1]

@@ -25,14 +25,16 @@ EVALUATE = "network"
 AgA = "random"
 #AgA = "heuristic"
 #AgA = "MCTS"
+#AgA = "network"
 
 #AgB = "random"
 #AgB = "heuristic"
 AgB = "MCTS"
+#AgB = "network"
 
 SINGLE_PLAY = False
 
-TOTAL_GAME_NUM = 10000
+TOTAL_GAME_NUM = 1000
 TOTAL_GAME_PRINT = 100
 
 #train

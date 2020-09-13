@@ -1,7 +1,11 @@
+import time
+import datetime
+
 from Gomoku import *
 from RandomAgent import RandomAgent as RandomAg
 from HeuristicAgent import HeuristicAgent as HeuristicAg
 from MCTSAgent import MCTSAgent as MCTSAg
+from NetworkAgent import NetworkAgent as NetworkAg
 
 
 if AgA == "random":
@@ -10,6 +14,8 @@ elif AgA == "heuristic":
     AgentA = HeuristicAg()
 elif AgA == "MCTS":
     AgentA = MCTSAg()
+elif AgA == "network":
+    AgentA = NetworkAg()
 
 if AgB == "random":
     AgentB = RandomAg()
@@ -17,6 +23,8 @@ elif AgB == "heuristic":
     AgentB = HeuristicAg()
 elif AgB == "MCTS":
     AgentB = MCTSAg()
+elif AgB == "network":
+    AgentB = NetworkAg()
 
 
 if SINGLE_PLAY:
@@ -48,9 +56,13 @@ else:
     o_count = 0
     draw_count = 0
 
+    init_ts = time.time()
     for i in range(TOTAL_GAME_NUM):
         if i % TOTAL_GAME_PRINT == 0:
-            print(i, "  ", x_count, o_count, draw_count)
+            ts = time.time() - init_ts
+            st = datetime.datetime.fromtimestamp(ts) - datetime.timedelta(seconds=3600*9)
+            st = st.strftime('%H:%M:%S')
+            print(st, i, "  ", x_count, o_count, draw_count, flush=True)
 
         gomoku = Gomoku(BOARD_SIZE, N_IN_A_ROW)
         turn = 0

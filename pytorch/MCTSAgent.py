@@ -22,7 +22,7 @@ class MCTSAgent:
         mcts.root = Node(board_state, EVALUATE)
 
         if board_state.turn < TEMPER_THRES:
-                TEMPERATURE = 1
+            TEMPERATURE = 1
         else:
             TEMPERATURE = TEMPER_EPS
 
