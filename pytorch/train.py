@@ -20,8 +20,8 @@ total_z_list = []
 
 if __name__ == '__main__':
     for iteration in range(SELF_PLAY_NUM):
-        if iteration % 5 == 0:
-            """
+        if iteration % 5 == 0 and iteration != 0:
+            #"""
             x_count = 0
             o_count = 0
             draw_count = 0
@@ -53,7 +53,7 @@ if __name__ == '__main__':
 
 
             print(x_count, o_count, draw_count, flush=True)
-            """
+            #"""
 
             x_count = 0
             o_count = 0
@@ -87,10 +87,10 @@ if __name__ == '__main__':
 
             print(x_count, o_count, draw_count, flush=True)
 
-            1/0
 
 
             #""" 
+            #1/0
 
 
 
@@ -134,7 +134,7 @@ if __name__ == '__main__':
                 n_list, n_sum = node.get_pi(TEMPERATURE)
                 for n in n_list:
                     idx = n.state.last_row * BS + n.state.last_col
-                    pi[idx] = n_list[n]
+                    pi[idx] = n_list[n] / n_sum
                 pi_list.append(pi)
                 
                 node = mcts.play(node, TEMPERATURE)
@@ -157,9 +157,9 @@ if __name__ == '__main__':
                     nst = int(next_state.turn + 1)
                     for i in range(nst):
                         if i%2*2-1 == next_state.turn%2*2-1:
-                            z_list.append(torch.tensor([1.0]))
+                            z_list.append(torch.tensor([0.0]))
                         else:
-                            z_list.append(torch.tensor([-1.0]))
+                            z_list.append(torch.tensor([0.0]))
                 
                     if next_state.turn%2*2-1 == 1:
                         winner = 'x'
@@ -175,6 +175,7 @@ if __name__ == '__main__':
                             datetime.datetime.fromtimestamp(time.time()).strftime('%Y-%m-%d %H:%M:%S')), flush=True)
                     break
                 elif next_state.turn == BS*BS:
+                    break
                     input_board = preproc_board(next_board, next_state.turn)
                     input_list.append(input_board[0])
                     pi = np.zeros([BS * BS])

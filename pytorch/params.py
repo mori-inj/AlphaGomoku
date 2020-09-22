@@ -8,7 +8,7 @@ EPSILON = 0.25 #0.1
 DIR_ALPHA = 0.7#0.3 #0.3
 
 MCTS_SIM_NUM = 32#128 #800 #512
-TEMPER_EPS = 0#1e-1
+TEMPER_EPS = 0 #1e-1
 TEMPERATURE = 1#TEMPER_EPS
 TEMPER_THRES = 2#6
 
@@ -22,14 +22,14 @@ RESIDUAL_NUM = 9
 #EVALUATE = "heuristic"
 EVALUATE = "network"
 
-AgA = "random"
+#AgA = "random"
 #AgA = "heuristic"
-#AgA = "MCTS"
+AgA = "MCTS"
 #AgA = "network"
 
-#AgB = "random"
+AgB = "random"
 #AgB = "heuristic"
-AgB = "MCTS"
+#AgB = "MCTS"
 #AgB = "network"
 
 SINGLE_PLAY = False
@@ -38,14 +38,14 @@ TOTAL_GAME_NUM = 1000
 TOTAL_GAME_PRINT = 100
 
 #train
-INIT_GAME_NUM = 100
-EPOCH_GAME_NUM = 100
+INIT_GAME_NUM = 10#0
+EPOCH_GAME_NUM = 10#0
 SELF_PLAY_NUM = 1000000
 TRAIN_ITER = 1#500
 PRINT_ITER = 1#100
 
 BATCH_SIZE = 32#10
-EPOCH = 20
+EPOCH = 10#20
 
 GAME_NUM = 200#10#100
 GAME_PRINT = 10#2#5

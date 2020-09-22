@@ -51,7 +51,7 @@ class PolicyHead(nn.Module):
         x = self.actv(self.bn(self.conv(x)))
         x = x.view(x.shape[0], -1)
         x = self.fc(x)
-        x = self.softmax(x)
+        #x = self.softmax(x)
         return x
 
 
@@ -104,7 +104,7 @@ class Network(nn.Module):
 
         def SoftCrossEntopyLoss(predicted, target):
             return -(target * torch.log(predicted)).sum(dim=1).mean()
-        self.policy_loss = SoftCrossEntopyLoss
+        self.policy_loss = nn.MSELoss() #SoftCrossEntopyLoss
         self.value_loss = nn.MSELoss()
 
         
@@ -127,11 +127,11 @@ class Network(nn.Module):
             loader = DataLoader(dataset=dataset, batch_size=BATCH_SIZE, shuffle=True, num_workers=0)
             
             self.train()
-            opt = torch.optim.Adam(self.parameters(), lr=0.000001, weight_decay=1e-4)
+            opt = torch.optim.Adam(self.parameters(), lr=0.001, weight_decay=1e-4)
             for epoch in range(TOTAL_EPOCH):
                 for X, pi, Z in loader:
                     X = X.cuda()
-                    pi = pi.cuda()
+                    pi = pi.float().cuda()
                     Z = Z.cuda()
                     P, V = self(X)
                     p_loss = self.policy_loss(P, pi)
@@ -157,6 +157,8 @@ class Network(nn.Module):
     def get_output(self, X):
         #X = torch.tensor(X).float().cuda()
         P, V = self(X)
+        softmax = nn.Softmax(dim=1)
+        P = softmax(P)
         #P = P.cpu().detach().numpy() 
         #V = V.cpu().detach().numpy() 
         return P, V
